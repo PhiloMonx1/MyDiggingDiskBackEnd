@@ -14,9 +14,15 @@ import side.mimi.mdd.restApi.Member.service.MemberService;
 public class MemberController {
 
 	private final MemberService memberService;
+
+	@GetMapping("/mypage")
+	public ResponseEntity<MemberResponseDto> getMyPage(@RequestHeader(name="Authorization") String token){
+		return ResponseEntity.ok().body(memberService.getMyPage(token));
+	}
+
 	@GetMapping("/{memberId}")
-	public ResponseEntity<MemberResponseDto> getMember(@PathVariable Long memberId){
-		return ResponseEntity.ok().body(memberService.getMember(memberId));
+	public ResponseEntity<MemberResponseDto> getMember(@PathVariable Long memberId, @RequestHeader(name="Authorization", required = false) String token){
+		return ResponseEntity.ok().body(memberService.getMember(memberId, token));
 	}
 
 	@PostMapping("/join")

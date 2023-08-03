@@ -25,7 +25,21 @@ public class MemberService {
 	private String secretKey;
 	private Long expireTimeMs = 1000 * 60 * 60 * 24L;
 
-	public MemberResponseDto getMember(Long memberId) {
+	public MemberResponseDto getMyPage(String token) {
+		String memberName = JwtUtil.getMemberName(token, secretKey);
+		MemberEntity member = memberRepository.findByMemberName(memberName)
+				.orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND_MEMBER, "해당 맴버를 찾을 수 없습니다."));
+
+		return MemberResponseDto.builder()
+				.memberId(member.getMemberId())
+				.memberName(member.getMemberName())
+				.nickname(member.getNickname())
+				.introduce(member.getIntroduce())
+				.isMe(true)
+				.build();
+	}
+	public MemberResponseDto getMember(Long memberId, String token) {
+		String memberName = token != null ? JwtUtil.getMemberName(token, secretKey) : null;
 		MemberEntity member = memberRepository.findById(memberId)
 				.orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND_MEMBER, "해당 id의 맴버를 찾을 수 없습니다."));
 
@@ -34,6 +48,7 @@ public class MemberService {
 				.memberName(member.getMemberName())
 				.nickname(member.getNickname())
 				.introduce(member.getIntroduce())
+				.isMe(memberName != null && member.getMemberName().equals(memberName))
 				.build();
 	}
 	public String join(MemberJoinRequestDto dto){
@@ -84,4 +99,6 @@ public class MemberService {
 
 		return JwtUtil.createToken(selectedMember.getMemberName(), secretKey, expireTimeMs);
 	}
+
+
 }

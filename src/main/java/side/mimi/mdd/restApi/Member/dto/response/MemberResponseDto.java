@@ -13,6 +13,7 @@ public class MemberResponseDto {
 	private String memberName;
 	private String nickname;
 	private String introduce;
+	private Boolean isMe;
 	//TODO: Member 소유의 disk[] 정보
 	//TODO: Member 좋아요 수.
 }
