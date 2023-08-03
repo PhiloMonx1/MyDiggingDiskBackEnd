@@ -25,9 +25,4 @@ public class MemberController {
 		String token = memberService.login(dto);
 		return ResponseEntity.ok().body(token);
 	}
-
-	@GetMapping("/hello")
-	public ResponseEntity<String> login(){
-		return ResponseEntity.ok().body("hello");
-	}
 }
