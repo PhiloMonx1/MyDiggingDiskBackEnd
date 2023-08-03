@@ -16,8 +16,8 @@ public class MemberController {
 
 	@PostMapping("/join")
 	public ResponseEntity<String> join(@RequestBody MemberJoinRequestDto dto){
-		memberService.join(dto);
-		return ResponseEntity.ok().body("회원가입에 성공했습니다.");
+		String token = memberService.join(dto);
+		return ResponseEntity.ok().body(token);
 	}
 
 	@PostMapping("/login")
