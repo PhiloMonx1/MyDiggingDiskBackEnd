@@ -35,6 +35,9 @@ public class MemberService {
 	private String secretKey;
 	private Long expireTimeMs = 1000 * 60 * 60 * 24L;
 
+	/**
+	 * 마이페이지
+	 */
 	public MemberResponseDto getMyPage(String token) {
 		String memberName = JwtUtil.getMemberName(token, secretKey);
 		MemberEntity member = memberRepository.findByMemberName(memberName)
@@ -48,6 +51,10 @@ public class MemberService {
 				.isMe(true)
 				.build();
 	}
+
+	/**
+	 * 회원 단일 조회
+	 */
 	public MemberResponseDto getMember(Long memberId, String token) {
 		String memberName = token != null ? JwtUtil.getMemberName(token, secretKey) : null;
 		MemberEntity member = memberRepository.findById(memberId)
@@ -62,13 +69,24 @@ public class MemberService {
 				.build();
 	}
 
+	/**
+	 * 회원 계정 (memberName) 중복체크
+	 */
 	public boolean checkMemberName(String memberName) {
 		return memberRepository.findByMemberName(memberName.toLowerCase()).isEmpty();
 	}
+
+	/**
+	 * 닉네임 중복체크
+	 */
 	public boolean checkNickname(String nickname) {
 		return memberRepository.findByNickname(nickname).isEmpty();
 	}
 
+
+	/**
+	 * 회원가입
+	 */
 	public String join(MemberJoinRequestDto dto){
 		if(dto.getMemberName().isEmpty() || dto.getPassword().isEmpty() || dto.getNickname().isEmpty()){
 			throw new AppException(ErrorCode.WRONG_MEMBER_NAME_VALID, "MemberName, password, nickname은 필수 값 입니다.");
@@ -107,6 +125,9 @@ public class MemberService {
 		return  JwtUtil.createToken(dto.getMemberName(), secretKey, expireTimeMs);
 	}
 
+	/**
+	 * 로그인
+	 */
 	public String login(MemberLoginRequestDto dto) {
 		MemberEntity selectedMember = memberRepository.findByMemberName(dto.getMemberName().toLowerCase())
 				.orElseThrow(() ->new AppException(ErrorCode.MEMBER_NAME_NOT_FOUND, "찾을 수 없는 memberName 입니다."));
@@ -138,6 +159,9 @@ public class MemberService {
 	}
 
 
+	/**
+	 * 회원 정보 수정
+	 */
 	public Long modifyMemberInfo(MemberModifyRequestDto dto, String token) {
 		if(dto.getNickname().length() > 10){
 			throw new AppException(ErrorCode.WRONG_NICKNAME_VALID, "nickname은 10자를 초과할 수 없습니다.");
@@ -159,6 +183,9 @@ public class MemberService {
 		return member.getMemberId();
 	}
 
+	/**
+	 * 회원 탈퇴
+	 */
 	public boolean removeMember(String token) {
 		String memberName = JwtUtil.getMemberName(token, secretKey);
 		MemberEntity member = memberRepository.findByMemberName(memberName)
@@ -169,6 +196,10 @@ public class MemberService {
 	}
 
 
+	/**
+	 * 서비스 로직 함수
+	 * 1. isLoginOverFailed = 로그인 자동 공격 방지 함수 (비밀번호 5회 틀릴 시 1분 동안 true)
+	 */
 	private boolean isLoginOverFailed(String memberName) {
 		PageRequest pageRequest = PageRequest.of(0, 5, Sort.by(Sort.Direction.DESC, "createdAt"));
 		Page<LoginLogEntity> loginLogPage = loginLogRepository.findByMemberName(memberName, pageRequest);
