@@ -2,6 +2,9 @@ package side.mimi.mdd.restApi.Member.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import side.mimi.mdd.exception.AppException;
@@ -9,16 +12,22 @@ import side.mimi.mdd.exception.ErrorCode;
 import side.mimi.mdd.restApi.Member.dto.request.MemberJoinRequestDto;
 import side.mimi.mdd.restApi.Member.dto.request.MemberLoginRequestDto;
 import side.mimi.mdd.restApi.Member.dto.response.MemberResponseDto;
+import side.mimi.mdd.restApi.Member.model.LoginLogEntity;
 import side.mimi.mdd.restApi.Member.model.MemberEntity;
+import side.mimi.mdd.restApi.Member.repository.LoginLogRepository;
 import side.mimi.mdd.restApi.Member.repository.MemberRepository;
 import side.mimi.mdd.utils.JwtUtil;
 import side.mimi.mdd.utils.RegexUtils;
+
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 
 @Service
 @RequiredArgsConstructor
 public class MemberService {
 
 	private final MemberRepository memberRepository;
+	private final LoginLogRepository loginLogRepository;
 	private final BCryptPasswordEncoder encoder;
 
 	@Value("${jwt.secret}")
@@ -93,12 +102,40 @@ public class MemberService {
 		MemberEntity selectedMember = memberRepository.findByMemberName(dto.getMemberName().toLowerCase())
 				.orElseThrow(() ->new AppException(ErrorCode.MEMBER_NAME_NOT_FOUND, "찾을 수 없는 memberName 입니다."));
 
+		if (isLoginOverFailed(dto.getMemberName().toLowerCase())) {
+			throw new AppException(ErrorCode.OVER_INVALID_PASSWORD, "너무 많은 로그인 시도를 했습니다. 잠시 후 다시 시도해주세요.");
+		}
+
 		if(!encoder.matches(dto.getPassword(), selectedMember.getPassword())){
+
+			LoginLogEntity loginLog = LoginLogEntity.builder()
+					.memberName(dto.getMemberName().toLowerCase())
+					.state(false)
+					.build();
+
+			loginLogRepository.save(loginLog);
+
 			throw new AppException(ErrorCode.INVALID_PASSWORD, "비밀번호가 일치하지 않습니다.");
 		}
+
+		LoginLogEntity loginLog = LoginLogEntity.builder()
+				.memberName(selectedMember.getMemberName().toLowerCase())
+				.state(true)
+				.build();
+
+		loginLogRepository.save(loginLog);
 
 		return JwtUtil.createToken(selectedMember.getMemberName(), secretKey, expireTimeMs);
 	}
 
+	private boolean isLoginOverFailed(String memberName) {
+		PageRequest pageRequest = PageRequest.of(0, 5, Sort.by(Sort.Direction.DESC, "createdAt"));
+		Page<LoginLogEntity> loginLogPage = loginLogRepository.findByMemberName(memberName, pageRequest);
 
+		LocalDateTime currentTime = LocalDateTime.now();
+
+		return loginLogPage.getNumberOfElements() == 5 &&
+				loginLogPage.getContent().stream().allMatch(log -> !log.isState()) &&
+				ChronoUnit.MINUTES.between(loginLogPage.getContent().get(0).getCreatedAt(), currentTime) < 1;
+	}
 }

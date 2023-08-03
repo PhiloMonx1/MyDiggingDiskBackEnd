@@ -22,7 +22,8 @@ public enum ErrorCode {
 	WRONG_INTRODUCE_VALID(HttpStatus.BAD_REQUEST, ""),
 	//로그인 (Login)
 	MEMBER_NAME_NOT_FOUND(HttpStatus.NOT_FOUND, ""),
-	INVALID_PASSWORD(HttpStatus.BAD_REQUEST, "")
+	INVALID_PASSWORD(HttpStatus.BAD_REQUEST, ""),
+	OVER_INVALID_PASSWORD(HttpStatus.BAD_REQUEST, "")
 
 	;
 
