@@ -51,9 +51,12 @@ public class SecurityConfig {
 						.requestMatchers(PathRequest.toH2Console()).permitAll()
 						//전체 허용 (개발단계 전체 API 허용)
 //						.requestMatchers(AntPathRequestMatcher.antMatcher("/api/**")).permitAll()
-						//회원 가입 로그인.
+						//MEMBER API.
 						.requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.POST,"/api/v1/members/join")).permitAll()
-						.requestMatchers(AntPathRequestMatcher.antMatcher("/api/v1/members/login")).permitAll()
+						.requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.POST,"/api/v1/members/login")).permitAll()
+						.requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.GET,"/api/v1/members/{memberId}")).permitAll()
+						.requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.GET,"/api/v1/members/check/{memberName}")).permitAll()
+						.requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.GET,"/api/v1/members/check/nick/{nickname}")).permitAll()
 
 						.anyRequest().authenticated())
 				.sessionManagement(sessionManagement -> sessionManagement

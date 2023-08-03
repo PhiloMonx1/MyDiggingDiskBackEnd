@@ -9,14 +9,14 @@ import java.util.Date;
 public class JwtUtil {
 
 	public static String createToken(String memberName, String secretKey, long expireTimeMs) {
-		String issuer = "JWT";
+		String issuer = "MDD";
 		Algorithm hashKey = Algorithm.HMAC256(secretKey);
 		Date issuedTime = new Date();
 		Date expirationTime = new Date(issuedTime.getTime() + expireTimeMs);
 
 		return JWT.create()
 				.withIssuer(issuer)
-				.withClaim("memberName", memberName)
+				.withClaim("memberName", memberName.toLowerCase())
 				.withIssuedAt(issuedTime)
 				.withExpiresAt(expirationTime)
 				.sign(hashKey);
@@ -24,6 +24,10 @@ public class JwtUtil {
 	}
 
 	public static DecodedJWT decodedToken(String token, String secretKey){
+		if(token.startsWith("Bearer ")){
+			token = token.split(" ")[1];
+		}
+
 		return JWT.require(Algorithm.HMAC256(secretKey))
 				.build()
 				.verify(token);

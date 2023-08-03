@@ -1,4 +1,4 @@
-package side.mimi.mdd.restApi.Member.dto;
+package side.mimi.mdd.restApi.Member.dto.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -8,4 +8,6 @@ import lombok.Getter;
 public class MemberJoinRequestDto {
 	private String memberName;
 	private String password;
+	private String nickname;
+	private String introduce;
 }
