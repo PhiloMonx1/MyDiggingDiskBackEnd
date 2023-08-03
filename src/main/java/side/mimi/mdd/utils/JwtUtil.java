@@ -16,7 +16,7 @@ public class JwtUtil {
 
 		return JWT.create()
 				.withIssuer(issuer)
-				.withClaim("memberName", memberName)
+				.withClaim("memberName", memberName.toLowerCase())
 				.withIssuedAt(issuedTime)
 				.withExpiresAt(expirationTime)
 				.sign(hashKey);
