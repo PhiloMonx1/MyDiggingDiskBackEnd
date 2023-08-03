@@ -60,6 +60,14 @@ public class MemberService {
 				.isMe(memberName != null && member.getMemberName().equals(memberName))
 				.build();
 	}
+
+	public boolean checkMemberName(String memberName) {
+		return memberRepository.findByMemberName(memberName.toLowerCase()).isEmpty();
+	}
+	public boolean checkNickname(String nickname) {
+		return memberRepository.findByNickname(nickname).isEmpty();
+	}
+
 	public String join(MemberJoinRequestDto dto){
 		if(dto.getMemberName().isEmpty() || dto.getPassword().isEmpty() || dto.getNickname().isEmpty()){
 			throw new AppException(ErrorCode.WRONG_MEMBER_NAME_VALID, "MemberName, password, nickname은 필수 값 입니다.");
@@ -127,6 +135,7 @@ public class MemberService {
 
 		return JwtUtil.createToken(selectedMember.getMemberName(), secretKey, expireTimeMs);
 	}
+
 
 	private boolean isLoginOverFailed(String memberName) {
 		PageRequest pageRequest = PageRequest.of(0, 5, Sort.by(Sort.Direction.DESC, "createdAt"));

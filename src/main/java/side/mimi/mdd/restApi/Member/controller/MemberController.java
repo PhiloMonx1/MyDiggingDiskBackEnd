@@ -25,6 +25,16 @@ public class MemberController {
 		return ResponseEntity.ok().body(memberService.getMember(memberId, token));
 	}
 
+	@GetMapping("/check/{memberName}")
+	public ResponseEntity<Boolean> checkMemberName(@PathVariable String memberName){
+		return ResponseEntity.ok().body(memberService.checkMemberName(memberName));
+	}
+
+	@GetMapping("/check/nick/{nickname}")
+	public ResponseEntity<Boolean> checkNickname(@PathVariable String nickname){
+		return ResponseEntity.ok().body(memberService.checkNickname(nickname));
+	}
+
 	@PostMapping("/join")
 	public ResponseEntity<String> join(@RequestBody MemberJoinRequestDto dto){
 		String token = memberService.join(dto);
