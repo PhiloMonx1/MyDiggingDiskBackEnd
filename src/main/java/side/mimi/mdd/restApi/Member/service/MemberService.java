@@ -11,6 +11,7 @@ import side.mimi.mdd.exception.AppException;
 import side.mimi.mdd.exception.ErrorCode;
 import side.mimi.mdd.restApi.Member.dto.request.MemberJoinRequestDto;
 import side.mimi.mdd.restApi.Member.dto.request.MemberLoginRequestDto;
+import side.mimi.mdd.restApi.Member.dto.request.MemberModifyRequestDto;
 import side.mimi.mdd.restApi.Member.dto.response.MemberResponseDto;
 import side.mimi.mdd.restApi.Member.model.LoginLogEntity;
 import side.mimi.mdd.restApi.Member.model.MemberEntity;
@@ -136,6 +137,27 @@ public class MemberService {
 		return JwtUtil.createToken(selectedMember.getMemberName(), secretKey, expireTimeMs);
 	}
 
+
+	public Long modifyMemberInfo(MemberModifyRequestDto dto, String token) {
+		if(dto.getNickname().length() > 10){
+			throw new AppException(ErrorCode.WRONG_NICKNAME_VALID, "nickname은 10자를 초과할 수 없습니다.");
+		}
+
+		if(dto.getIntroduce().length() > 30){
+			throw new AppException(ErrorCode.WRONG_INTRODUCE_VALID, "introduce는 30자를 초과할 수 없습니다.");
+		}
+
+		memberRepository.findByNickname(dto.getNickname())
+				.ifPresent(memberEntity -> {throw new AppException(ErrorCode.MEMBER_NICKNAME_DUPLICATED, "이미 사용중인 nickname 입니다.");});
+
+		String memberName = JwtUtil.getMemberName(token, secretKey);
+		MemberEntity member = memberRepository.findByMemberName(memberName)
+				.orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND_MEMBER, "해당 맴버를 찾을 수 없습니다."));
+
+		member.modifyMemberInfo(dto);
+		memberRepository.save(member);
+		return member.getMemberId();
+	}
 
 	public boolean removeMember(String token) {
 		String memberName = JwtUtil.getMemberName(token, secretKey);

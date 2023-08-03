@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import side.mimi.mdd.restApi.Member.dto.request.MemberJoinRequestDto;
 import side.mimi.mdd.restApi.Member.dto.request.MemberLoginRequestDto;
+import side.mimi.mdd.restApi.Member.dto.request.MemberModifyRequestDto;
 import side.mimi.mdd.restApi.Member.dto.response.MemberResponseDto;
 import side.mimi.mdd.restApi.Member.service.MemberService;
 
@@ -45,6 +46,11 @@ public class MemberController {
 	public ResponseEntity<String> login(@RequestBody MemberLoginRequestDto dto){
 		String token = memberService.login(dto);
 		return ResponseEntity.ok().body(token);
+	}
+
+	@PatchMapping("")
+	public ResponseEntity<Long> modifyMemberInfo(@RequestBody MemberModifyRequestDto dto, @RequestHeader(name="Authorization") String token){
+		return ResponseEntity.ok().body(memberService.modifyMemberInfo(dto, token));
 	}
 
 	@DeleteMapping("")

@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import side.mimi.mdd.restApi.Member.dto.request.MemberModifyRequestDto;
 import side.mimi.mdd.utils.BaseEntity;
 
 @Builder
@@ -31,4 +32,9 @@ public class MemberEntity extends BaseEntity {
 
 	@Column(name = "INTRODUCE", length = 30)
 	private String introduce;
+
+	public void modifyMemberInfo(MemberModifyRequestDto dto){
+		if(!dto.getNickname().isEmpty()) nickname = dto.getNickname();
+		if(!dto.getIntroduce().isEmpty()) introduce = dto.getIntroduce();
+	}
 }
