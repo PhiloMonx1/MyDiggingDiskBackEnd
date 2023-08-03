@@ -10,6 +10,8 @@ public enum ErrorCode {
 	/**
 	 *MemberService 관련 에러코드
 	 */
+	//조회 (Get)
+	NOT_FOUND_MEMBER(HttpStatus.NOT_FOUND, ""),
 	//가입 (Join)
 	EMPTY_JOIN_REQUEST(HttpStatus.BAD_REQUEST, ""),
 	MEMBER_NAME_DUPLICATED(HttpStatus.CONFLICT, ""),

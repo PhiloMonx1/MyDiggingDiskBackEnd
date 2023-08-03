@@ -6,8 +6,9 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import side.mimi.mdd.exception.AppException;
 import side.mimi.mdd.exception.ErrorCode;
-import side.mimi.mdd.restApi.Member.dto.MemberJoinRequestDto;
-import side.mimi.mdd.restApi.Member.dto.MemberLoginRequestDto;
+import side.mimi.mdd.restApi.Member.dto.request.MemberJoinRequestDto;
+import side.mimi.mdd.restApi.Member.dto.request.MemberLoginRequestDto;
+import side.mimi.mdd.restApi.Member.dto.response.MemberResponseDto;
 import side.mimi.mdd.restApi.Member.model.MemberEntity;
 import side.mimi.mdd.restApi.Member.repository.MemberRepository;
 import side.mimi.mdd.utils.JwtUtil;
@@ -24,6 +25,17 @@ public class MemberService {
 	private String secretKey;
 	private Long expireTimeMs = 1000 * 60 * 60 * 24L;
 
+	public MemberResponseDto getMember(Long memberId) {
+		MemberEntity member = memberRepository.findById(memberId)
+				.orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND_MEMBER, "해당 id의 맴버를 찾을 수 없습니다."));
+
+		return MemberResponseDto.builder()
+				.memberId(member.getMemberId())
+				.memberName(member.getMemberName())
+				.nickname(member.getNickname())
+				.introduce(member.getIntroduce())
+				.build();
+	}
 	public String join(MemberJoinRequestDto dto){
 		if(dto.getMemberName().isEmpty() || dto.getPassword().isEmpty() || dto.getNickname().isEmpty()){
 			throw new AppException(ErrorCode.WRONG_MEMBER_NAME_VALID, "MemberName, password, nickname은 필수 값 입니다.");
