@@ -63,7 +63,7 @@ public class MemberService {
 	}
 
 	public String login(MemberLoginRequestDto dto) {
-		MemberEntity selectedMember = memberRepository.findByMemberName(dto.getMemberName())
+		MemberEntity selectedMember = memberRepository.findByMemberName(dto.getMemberName().toLowerCase())
 				.orElseThrow(() ->new AppException(ErrorCode.MEMBER_NAME_NOT_FOUND, "찾을 수 없는 memberName 입니다."));
 
 		if(!encoder.matches(dto.getPassword(), selectedMember.getPassword())){
