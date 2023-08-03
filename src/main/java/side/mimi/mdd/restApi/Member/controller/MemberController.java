@@ -46,4 +46,9 @@ public class MemberController {
 		String token = memberService.login(dto);
 		return ResponseEntity.ok().body(token);
 	}
+
+	@DeleteMapping("")
+	public ResponseEntity<Boolean> removeMember(@RequestHeader(name="Authorization") String token){
+		return ResponseEntity.ok().body(memberService.removeMember(token));
+	}
 }

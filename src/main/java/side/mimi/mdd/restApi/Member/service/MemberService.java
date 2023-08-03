@@ -137,6 +137,16 @@ public class MemberService {
 	}
 
 
+	public boolean removeMember(String token) {
+		String memberName = JwtUtil.getMemberName(token, secretKey);
+		MemberEntity member = memberRepository.findByMemberName(memberName)
+				.orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND_MEMBER, "해당 맴버를 찾을 수 없습니다."));
+
+		memberRepository.deleteById(member.getMemberId());
+		return true;
+	}
+
+
 	private boolean isLoginOverFailed(String memberName) {
 		PageRequest pageRequest = PageRequest.of(0, 5, Sort.by(Sort.Direction.DESC, "createdAt"));
 		Page<LoginLogEntity> loginLogPage = loginLogRepository.findByMemberName(memberName, pageRequest);
