@@ -37,6 +37,24 @@ public class DiskService {
 				.collect(Collectors.toList());
 	}
 
+	public DiskResponseDto getDiskById(Long diskId, String token) {
+		MemberEntity member = memberService.getMemberByJwt(token);
+
+		DiskEntity disk = diskRepository.findById(diskId)
+				.orElseThrow(() ->new AppException(ErrorCode.NOT_FOUND_DISK, "해당 DiskId를 가진 Disk를 찾을 수 없습니다."));
+
+		return DiskResponseDto.builder()
+				.diskId(disk.getDiskId())
+				.diskName(disk.getDiskName())
+				.content(disk.getContent())
+				.diskColor(disk.getDiskColor())
+				.isPrivate(disk.isPrivate())
+				.isMine(member != null && disk.getMember().getMemberId() == member.getMemberId())
+				.createdAt(disk.getCreatedAt())
+				.modifiedAt(disk.getModifiedAt())
+				.build();
+	}
+
 	public DiskResponseDto postDisk(DiskPostRequestDto dto, String token) {
 		MemberEntity member = memberService.getMemberByJwt(token);
 

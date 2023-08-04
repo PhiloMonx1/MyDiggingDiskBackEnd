@@ -20,6 +20,11 @@ public class DiskController {
 		return ResponseEntity.ok().body(diskService.getMyDisks(token));
 	}
 
+	@GetMapping("/{diskId}")
+	public ResponseEntity<DiskResponseDto> getDiskById(@PathVariable Long diskId, @RequestHeader(name="Authorization", required = false) String token){
+		return ResponseEntity.ok().body(diskService.getDiskById(diskId, token));
+	}
+
 	@PostMapping("")
 	public ResponseEntity<DiskResponseDto> postDisk(@RequestBody DiskPostRequestDto dto, @RequestHeader(name="Authorization") String token){
 		return ResponseEntity.ok().body(diskService.postDisk(dto, token));
