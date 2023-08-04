@@ -105,4 +105,16 @@ public class DiskService {
 
 		return myDisk.getDiskId();
 	}
+
+	public Boolean deleteDisk(Long diskId, String token) {
+		MemberEntity member = memberService.getMemberByJwt(token);
+
+		DiskEntity myDisk = diskRepository.findById(diskId)
+				.orElseThrow(() ->new AppException(ErrorCode.NOT_FOUND_DISK, "해당 DiskId를 가진 Disk를 찾을 수 없습니다."));
+
+		if(myDisk.getMember().getMemberId() != member.getMemberId()) throw new AppException(ErrorCode.NOT_DISK_OWNER, "Disk 소유자만 삭제 권한이 주어집니다.");
+
+		diskRepository.delete(myDisk);
+		return true;
+	}
 }

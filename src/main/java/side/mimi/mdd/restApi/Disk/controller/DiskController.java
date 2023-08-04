@@ -36,4 +36,9 @@ public class DiskController {
 	public ResponseEntity<Long> modifyDisk(@PathVariable Long diskId, @RequestBody DiskModifyRequestDto dto, @RequestHeader(name="Authorization") String token){
 		return ResponseEntity.ok().body(diskService.modifyDisk(diskId, dto, token));
 	}
+
+	@DeleteMapping("/{diskId}")
+	public ResponseEntity<Boolean> deleteDisk(@PathVariable Long diskId, @RequestHeader(name="Authorization") String token){
+		return ResponseEntity.ok().body(diskService.deleteDisk(diskId, token));
+	}
 }
