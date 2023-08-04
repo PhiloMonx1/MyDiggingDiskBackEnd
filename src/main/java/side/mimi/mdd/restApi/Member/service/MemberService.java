@@ -54,12 +54,14 @@ public class MemberService {
 		MemberEntity member = memberRepository.findById(memberId)
 				.orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND_MEMBER, "해당 id의 맴버를 찾을 수 없습니다."));
 
+		MemberEntity memberByJwt = getMemberByJwt(token);
+
 		return MemberResponseDto.builder()
 				.memberId(member.getMemberId())
 				.memberName(member.getMemberName())
 				.nickname(member.getNickname())
 				.introduce(member.getIntroduce())
-				.isMe(getMemberByJwt(token) != null && member.getMemberName().equals(getMemberByJwt(token).getMemberName()))
+				.isMe(memberByJwt != null && member.getMemberName().equals(memberByJwt.getMemberName()))
 				.build();
 	}
 
