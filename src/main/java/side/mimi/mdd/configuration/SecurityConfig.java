@@ -23,7 +23,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class SecurityConfig {
 	private String frontendUrl = "http://localhost:3000";
-	private final MemberService memberService;
 
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
@@ -59,7 +58,7 @@ public class SecurityConfig {
 						.anyRequest().authenticated())
 				.sessionManagement(sessionManagement -> sessionManagement
 						.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-				.addFilterBefore(new JwtFilter(memberService), UsernamePasswordAuthenticationFilter.class)
+				.addFilterBefore(new JwtFilter(), UsernamePasswordAuthenticationFilter.class)
 				.build();
 	}
 }
