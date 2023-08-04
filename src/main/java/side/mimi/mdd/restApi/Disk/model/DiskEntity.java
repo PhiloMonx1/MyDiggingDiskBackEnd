@@ -1,5 +1,6 @@
 package side.mimi.mdd.restApi.Disk.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -35,6 +36,7 @@ public class DiskEntity extends BaseEntity {
 	private boolean isPrivate;
 
 	@ManyToOne(fetch = FetchType.LAZY)
+	@JsonBackReference
 	@JoinColumn(name = "MEMBER_ID")
 	private MemberEntity member;
 

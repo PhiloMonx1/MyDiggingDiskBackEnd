@@ -1,5 +1,6 @@
 package side.mimi.mdd.restApi.Member.model;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -38,6 +39,7 @@ public class MemberEntity extends BaseEntity {
 	private String introduce;
 
 	@OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
+	@JsonManagedReference
 	private List<DiskEntity> diskList = new ArrayList<>();
 
 	public void modifyMemberInfo(MemberModifyRequestDto dto){
