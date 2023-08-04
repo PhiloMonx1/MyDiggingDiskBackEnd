@@ -1,7 +1,6 @@
 package side.mimi.mdd.restApi.Member.service;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -35,9 +34,8 @@ public class MemberService {
 	 * 마이페이지
 	 */
 	public MemberResponseDto getMyPage(String token) {
-		String memberName = JwtUtil.getMemberName(token);
-		MemberEntity member = memberRepository.findByMemberName(memberName)
-				.orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND_MEMBER, "해당 맴버를 찾을 수 없습니다."));
+
+		MemberEntity member = getMemberByJwt(token);
 
 		return MemberResponseDto.builder()
 				.memberId(member.getMemberId())
@@ -52,7 +50,7 @@ public class MemberService {
 	 * 회원 단일 조회
 	 */
 	public MemberResponseDto getMember(Long memberId, String token) {
-		String memberName = token != null ? JwtUtil.getMemberName(token) : null;
+
 		MemberEntity member = memberRepository.findById(memberId)
 				.orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND_MEMBER, "해당 id의 맴버를 찾을 수 없습니다."));
 
@@ -61,7 +59,7 @@ public class MemberService {
 				.memberName(member.getMemberName())
 				.nickname(member.getNickname())
 				.introduce(member.getIntroduce())
-				.isMe(memberName != null && member.getMemberName().equals(memberName))
+				.isMe(getMemberByJwt(token) != null && member.getMemberName().equals(getMemberByJwt(token).getMemberName()))
 				.build();
 	}
 
@@ -170,9 +168,7 @@ public class MemberService {
 		memberRepository.findByNickname(dto.getNickname())
 				.ifPresent(memberEntity -> {throw new AppException(ErrorCode.MEMBER_NICKNAME_DUPLICATED, "이미 사용중인 nickname 입니다.");});
 
-		String memberName = JwtUtil.getMemberName(token);
-		MemberEntity member = memberRepository.findByMemberName(memberName)
-				.orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND_MEMBER, "해당 맴버를 찾을 수 없습니다."));
+		MemberEntity member = getMemberByJwt(token);
 
 		member.modifyMemberInfo(dto);
 		memberRepository.save(member);
@@ -183,18 +179,16 @@ public class MemberService {
 	 * 회원 탈퇴
 	 */
 	public boolean removeMember(String token) {
-		String memberName = JwtUtil.getMemberName(token);
-		MemberEntity member = memberRepository.findByMemberName(memberName)
-				.orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND_MEMBER, "해당 맴버를 찾을 수 없습니다."));
-
+		MemberEntity member = getMemberByJwt(token);
 		memberRepository.deleteById(member.getMemberId());
 		return true;
 	}
 
 
 	/**
-	 * 서비스 로직 함수
+	 * 서비스 로직 함수 모음
 	 * 1. isLoginOverFailed = 로그인 자동 공격 방지 함수 (비밀번호 5회 틀릴 시 1분 동안 true)
+	 * 2. getMemberByJwt = 토큰에서 맴버 객체 뽑기
 	 */
 	private boolean isLoginOverFailed(String memberName) {
 		PageRequest pageRequest = PageRequest.of(0, 5, Sort.by(Sort.Direction.DESC, "createdAt"));
@@ -205,5 +199,13 @@ public class MemberService {
 		return loginLogPage.getNumberOfElements() == 5 &&
 				loginLogPage.getContent().stream().allMatch(log -> !log.isState()) &&
 				ChronoUnit.MINUTES.between(loginLogPage.getContent().get(0).getCreatedAt(), currentTime) < 1;
+	}
+
+	public MemberEntity getMemberByJwt(String token) {
+		if(token == null) return null;
+
+		String memberName = JwtUtil.getMemberName(token);
+		return memberRepository.findByMemberName(memberName)
+				.orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND_MEMBER, "해당 맴버를 찾을 수 없습니다."));
 	}
 }
