@@ -11,11 +11,31 @@ import side.mimi.mdd.restApi.Disk.repository.DiskRepository;
 import side.mimi.mdd.restApi.Member.model.MemberEntity;
 import side.mimi.mdd.restApi.Member.service.MemberService;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Service
 @RequiredArgsConstructor
 public class DiskService {
 	private final DiskRepository diskRepository;
 	private final MemberService memberService;
+
+	public List<DiskResponseDto> getMyDisks(String token) {
+		MemberEntity member = memberService.getMemberByJwt(token);
+		List<DiskEntity> myDisks = diskRepository.findAllByMemberMemberId(member.getMemberId());
+
+		return myDisks.stream().map(disk -> DiskResponseDto.builder()
+						.diskId(disk.getDiskId())
+						.diskName(disk.getDiskName())
+						.content(disk.getContent())
+						.diskColor(disk.getDiskColor())
+						.isPrivate(disk.isPrivate())
+						.isMine(true)
+						.createdAt(disk.getCreatedAt())
+						.modifiedAt(disk.getModifiedAt())
+						.build())
+				.collect(Collectors.toList());
+	}
 
 	public DiskResponseDto postDisk(DiskPostRequestDto dto, String token) {
 		MemberEntity member = memberService.getMemberByJwt(token);
