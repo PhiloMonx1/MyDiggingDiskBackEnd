@@ -31,15 +31,11 @@ public class MemberService {
 	private final LoginLogRepository loginLogRepository;
 	private final BCryptPasswordEncoder encoder;
 
-	@Value("${jwt.secret}")
-	private String secretKey;
-	private Long expireTimeMs = 1000 * 60 * 60 * 24L;
-
 	/**
 	 * 마이페이지
 	 */
 	public MemberResponseDto getMyPage(String token) {
-		String memberName = JwtUtil.getMemberName(token, secretKey);
+		String memberName = JwtUtil.getMemberName(token);
 		MemberEntity member = memberRepository.findByMemberName(memberName)
 				.orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND_MEMBER, "해당 맴버를 찾을 수 없습니다."));
 
@@ -56,7 +52,7 @@ public class MemberService {
 	 * 회원 단일 조회
 	 */
 	public MemberResponseDto getMember(Long memberId, String token) {
-		String memberName = token != null ? JwtUtil.getMemberName(token, secretKey) : null;
+		String memberName = token != null ? JwtUtil.getMemberName(token) : null;
 		MemberEntity member = memberRepository.findById(memberId)
 				.orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND_MEMBER, "해당 id의 맴버를 찾을 수 없습니다."));
 
@@ -122,7 +118,7 @@ public class MemberService {
 				.introduce(dto.getIntroduce())
 				.build());
 
-		return  JwtUtil.createToken(dto.getMemberName(), secretKey, expireTimeMs);
+		return  JwtUtil.createToken(dto.getMemberName());
 	}
 
 	/**
@@ -155,7 +151,7 @@ public class MemberService {
 
 		loginLogRepository.save(loginLog);
 
-		return JwtUtil.createToken(selectedMember.getMemberName(), secretKey, expireTimeMs);
+		return JwtUtil.createToken(selectedMember.getMemberName());
 	}
 
 
@@ -174,7 +170,7 @@ public class MemberService {
 		memberRepository.findByNickname(dto.getNickname())
 				.ifPresent(memberEntity -> {throw new AppException(ErrorCode.MEMBER_NICKNAME_DUPLICATED, "이미 사용중인 nickname 입니다.");});
 
-		String memberName = JwtUtil.getMemberName(token, secretKey);
+		String memberName = JwtUtil.getMemberName(token);
 		MemberEntity member = memberRepository.findByMemberName(memberName)
 				.orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND_MEMBER, "해당 맴버를 찾을 수 없습니다."));
 
@@ -187,7 +183,7 @@ public class MemberService {
 	 * 회원 탈퇴
 	 */
 	public boolean removeMember(String token) {
-		String memberName = JwtUtil.getMemberName(token, secretKey);
+		String memberName = JwtUtil.getMemberName(token);
 		MemberEntity member = memberRepository.findByMemberName(memberName)
 				.orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND_MEMBER, "해당 맴버를 찾을 수 없습니다."));
 

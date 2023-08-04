@@ -21,7 +21,6 @@ import java.util.List;
 public class JwtFilter extends OncePerRequestFilter {
 
 	private final MemberService memberService;
-	private final String secretKey;
 
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
@@ -35,12 +34,12 @@ public class JwtFilter extends OncePerRequestFilter {
 
 		String token = authorization.split(" ")[1];
 
-		if(JwtUtil.isExpiredToken(token, secretKey)){
+		if(JwtUtil.isExpiredToken(token)){
 			filterChain.doFilter(request, response);
 			return;
 		}
 
-		String memberName = JwtUtil.getMemberName(token, secretKey);
+		String memberName = JwtUtil.getMemberName(token);
 
 		UsernamePasswordAuthenticationToken authenticationToken =
 				new UsernamePasswordAuthenticationToken(memberName, null, List.of(new SimpleGrantedAuthority("USER")));
