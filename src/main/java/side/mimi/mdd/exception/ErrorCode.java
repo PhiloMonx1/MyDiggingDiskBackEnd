@@ -23,8 +23,13 @@ public enum ErrorCode {
 	//로그인 (Login)
 	MEMBER_NAME_NOT_FOUND(HttpStatus.NOT_FOUND, ""),
 	INVALID_PASSWORD(HttpStatus.BAD_REQUEST, ""),
-	OVER_INVALID_PASSWORD(HttpStatus.BAD_REQUEST, "")
-
+	OVER_INVALID_PASSWORD(HttpStatus.BAD_REQUEST, ""),
+	/**
+	 * DiskService 관련 에러코드
+	 */
+	//작성
+	OVER_LONG_DISK_NAME(HttpStatus.BAD_REQUEST, ""),
+	OVER_LONG_CONTENT(HttpStatus.BAD_REQUEST, ""),
 	;
 
 	private HttpStatus httpStatus;
