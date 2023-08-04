@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import side.mimi.mdd.restApi.Disk.dto.request.DiskModifyRequestDto;
 import side.mimi.mdd.restApi.Disk.model.enums.DiskColorEnum;
 import side.mimi.mdd.restApi.Member.model.MemberEntity;
 import side.mimi.mdd.utils.BaseEntity;
@@ -40,4 +41,10 @@ public class DiskEntity extends BaseEntity {
 	@JoinColumn(name = "MEMBER_ID")
 	private MemberEntity member;
 
+	public void modifyDisk(DiskModifyRequestDto dto){
+		if(dto.getDiskName() != null) diskName = dto.getDiskName();
+		if(dto.getContent() != null) content = dto.getContent();
+		if(dto.getDiskColor() != null) diskColor = dto.getDiskColor();
+		if(dto.getIsPrivate() != null) isPrivate = dto.getIsPrivate();
+	}
 }

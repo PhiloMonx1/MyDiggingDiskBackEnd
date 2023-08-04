@@ -32,6 +32,8 @@ public enum ErrorCode {
 	OVER_LONG_CONTENT(HttpStatus.BAD_REQUEST, ""),
 	//조회
 	NOT_FOUND_DISK(HttpStatus.NOT_FOUND, ""),
+	//수정, 삭제
+	NOT_DISK_OWNER(HttpStatus.NOT_FOUND, ""),
 	;
 
 	private HttpStatus httpStatus;

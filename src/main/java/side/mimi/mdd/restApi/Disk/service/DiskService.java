@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import side.mimi.mdd.exception.AppException;
 import side.mimi.mdd.exception.ErrorCode;
+import side.mimi.mdd.restApi.Disk.dto.request.DiskModifyRequestDto;
 import side.mimi.mdd.restApi.Disk.dto.request.DiskPostRequestDto;
 import side.mimi.mdd.restApi.Disk.dto.response.DiskResponseDto;
 import side.mimi.mdd.restApi.Disk.model.DiskEntity;
@@ -87,5 +88,21 @@ public class DiskService {
 				.createdAt(disk.getCreatedAt())
 				.modifiedAt(disk.getModifiedAt())
 				.build();
+	}
+
+	public Long modifyDisk(Long diskId, DiskModifyRequestDto dto, String token) {
+		MemberEntity member = memberService.getMemberByJwt(token);
+
+		DiskEntity myDisk = diskRepository.findById(diskId)
+						.orElseThrow(() ->new AppException(ErrorCode.NOT_FOUND_DISK, "해당 DiskId를 가진 Disk를 찾을 수 없습니다."));
+
+		if(myDisk.getMember().getMemberId() != member.getMemberId()) throw new AppException(ErrorCode.NOT_DISK_OWNER, "Disk 소유자만 수정 권한이 주어집니다.");
+		if(dto.getDiskName() != null && dto.getDiskName().length() > 30) throw new AppException(ErrorCode.OVER_LONG_DISK_NAME, "DiskName 값은 30자를 초과할 수 없습니다.");
+		if(dto.getContent() != null && dto.getContent().length() > 300) throw new AppException(ErrorCode.OVER_LONG_CONTENT, "content 값은 300자를 초과할 수 없습니다.");
+
+		myDisk.modifyDisk(dto);
+		diskRepository.save(myDisk);
+
+		return myDisk.getDiskId();
 	}
 }
