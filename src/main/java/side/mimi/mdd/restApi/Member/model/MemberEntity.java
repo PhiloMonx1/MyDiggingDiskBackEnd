@@ -1,12 +1,17 @@
 package side.mimi.mdd.restApi.Member.model;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import side.mimi.mdd.restApi.Disk.model.DiskEntity;
 import side.mimi.mdd.restApi.Member.dto.request.MemberModifyRequestDto;
 import side.mimi.mdd.utils.BaseEntity;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Builder
 @Entity
@@ -32,6 +37,10 @@ public class MemberEntity extends BaseEntity {
 
 	@Column(name = "INTRODUCE", length = 30)
 	private String introduce;
+
+	@OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
+	@JsonManagedReference
+	private List<DiskEntity> diskList = new ArrayList<>();
 
 	public void modifyMemberInfo(MemberModifyRequestDto dto){
 		if(!dto.getNickname().isEmpty()) nickname = dto.getNickname();
