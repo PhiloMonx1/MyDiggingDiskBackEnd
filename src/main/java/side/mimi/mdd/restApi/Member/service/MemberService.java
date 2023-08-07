@@ -84,30 +84,19 @@ public class MemberService {
 	 * 회원가입
 	 */
 	public String join(MemberJoinRequestDto dto){
-		if(dto.getMemberName().isEmpty() || dto.getPassword().isEmpty() || dto.getNickname().isEmpty()){
-			throw new AppException(ErrorCode.WRONG_MEMBER_NAME_VALID, "MemberName, password, nickname은 필수 값 입니다.");
-		}
+
+		if(dto.getMemberName().isEmpty() || dto.getPassword().isEmpty() || dto.getNickname().isEmpty()) throw new AppException(ErrorCode.WRONG_MEMBER_NAME_VALID, "MemberName, password, nickname은 필수 값 입니다.");
 		String memberName = dto.getMemberName().toLowerCase();
 
-		if(memberName.length() > 20 || !RegexUtils.isAlphanumeric(memberName)){
+		if(memberName.length() > 20 || !RegexUtils.isAlphanumeric(memberName))
 			throw new AppException(ErrorCode.WRONG_MEMBER_NAME_VALID, "MemberName은 20자 이하의 영어와 숫자로만 이루어져 있어야 합니다.");
-		}
-
-		if(dto.getPassword().length() != 6 || !RegexUtils.isNumeric(dto.getPassword())){
+		if(dto.getPassword().length() != 6 || !RegexUtils.isNumeric(dto.getPassword()))
 			throw new AppException(ErrorCode.WRONG_PASSWORD_VALID, "password는 6자리 숫자로만 이루어져 있어야 합니다.");
-		}
-
-		if(dto.getNickname().length() > 10){
-			throw new AppException(ErrorCode.WRONG_NICKNAME_VALID, "nickname은 10자를 초과할 수 없습니다.");
-		}
-
-		if(dto.getIntroduce().length() > 30){
-			throw new AppException(ErrorCode.WRONG_INTRODUCE_VALID, "introduce는 30자를 초과할 수 없습니다.");
-		}
+		if(dto.getNickname().length() > 10) throw new AppException(ErrorCode.WRONG_NICKNAME_VALID, "nickname은 10자를 초과할 수 없습니다.");
+		if(dto.getIntroduce().length() > 30) throw new AppException(ErrorCode.WRONG_INTRODUCE_VALID, "introduce는 30자를 초과할 수 없습니다.");
 
 		memberRepository.findByMemberName(memberName)
 				.ifPresent(memberEntity -> {throw new AppException(ErrorCode.MEMBER_NAME_DUPLICATED, "이미 사용중인 MemberName 입니다.");});
-
 		memberRepository.findByNickname(dto.getNickname())
 				.ifPresent(memberEntity -> {throw new AppException(ErrorCode.MEMBER_NICKNAME_DUPLICATED, "이미 사용중인 nickname 입니다.");});
 
@@ -128,19 +117,17 @@ public class MemberService {
 		MemberEntity selectedMember = memberRepository.findByMemberName(dto.getMemberName().toLowerCase())
 				.orElseThrow(() ->new AppException(ErrorCode.MEMBER_NAME_NOT_FOUND, "찾을 수 없는 memberName 입니다."));
 
-		if (isLoginOverFailed(dto.getMemberName().toLowerCase())) {
+		if (isLoginOverFailed(dto.getMemberName().toLowerCase()))
 			throw new AppException(ErrorCode.OVER_INVALID_PASSWORD, "너무 많은 로그인 시도를 했습니다. 잠시 후 다시 시도해주세요.");
-		}
+
 
 		if(!encoder.matches(dto.getPassword(), selectedMember.getPassword())){
-
 			LoginLogEntity loginLog = LoginLogEntity.builder()
 					.memberName(dto.getMemberName().toLowerCase())
 					.state(false)
 					.build();
 
 			loginLogRepository.save(loginLog);
-
 			throw new AppException(ErrorCode.INVALID_PASSWORD, "비밀번호가 일치하지 않습니다.");
 		}
 
@@ -159,13 +146,8 @@ public class MemberService {
 	 * 회원 정보 수정
 	 */
 	public Long modifyMemberInfo(MemberModifyRequestDto dto, String token) {
-		if(dto.getNickname().length() > 10){
-			throw new AppException(ErrorCode.WRONG_NICKNAME_VALID, "nickname은 10자를 초과할 수 없습니다.");
-		}
-
-		if(dto.getIntroduce().length() > 30){
-			throw new AppException(ErrorCode.WRONG_INTRODUCE_VALID, "introduce는 30자를 초과할 수 없습니다.");
-		}
+		if(dto.getNickname().length() > 10) throw new AppException(ErrorCode.WRONG_NICKNAME_VALID, "nickname은 10자를 초과할 수 없습니다.");
+		if(dto.getIntroduce().length() > 30) throw new AppException(ErrorCode.WRONG_INTRODUCE_VALID, "introduce는 30자를 초과할 수 없습니다.");
 
 		memberRepository.findByNickname(dto.getNickname())
 				.ifPresent(memberEntity -> {throw new AppException(ErrorCode.MEMBER_NICKNAME_DUPLICATED, "이미 사용중인 nickname 입니다.");});

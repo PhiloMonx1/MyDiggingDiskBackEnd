@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
+
 @AllArgsConstructor
 @Getter
 @Builder
@@ -16,4 +18,6 @@ public class MemberResponseDto {
 	private Boolean isMe;
 	//TODO: Member 소유의 disk[] 정보
 	//TODO: Member 좋아요 수.
+	private LocalDateTime createdAt;
+	private LocalDateTime modifiedAt;
 }
