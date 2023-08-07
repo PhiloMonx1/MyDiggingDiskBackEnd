@@ -12,6 +12,7 @@ import side.mimi.mdd.restApi.Member.dto.request.MemberJoinRequestDto;
 import side.mimi.mdd.restApi.Member.dto.request.MemberLoginRequestDto;
 import side.mimi.mdd.restApi.Member.dto.request.MemberModifyRequestDto;
 import side.mimi.mdd.restApi.Member.dto.response.MemberResponseDto;
+import side.mimi.mdd.restApi.Member.dto.response.MemberTokenResponseDto;
 import side.mimi.mdd.restApi.Member.model.LoginLogEntity;
 import side.mimi.mdd.restApi.Member.model.MemberEntity;
 import side.mimi.mdd.restApi.Member.repository.LoginLogRepository;
@@ -83,7 +84,7 @@ public class MemberService {
 	/**
 	 * 회원가입
 	 */
-	public String join(MemberJoinRequestDto dto){
+	public MemberTokenResponseDto join(MemberJoinRequestDto dto){
 
 		if(dto.getMemberName().isEmpty() || dto.getPassword().isEmpty() || dto.getNickname().isEmpty()) throw new AppException(ErrorCode.WRONG_MEMBER_NAME_VALID, "MemberName, password, nickname은 필수 값 입니다.");
 		String memberName = dto.getMemberName().toLowerCase();
@@ -100,20 +101,36 @@ public class MemberService {
 		memberRepository.findByNickname(dto.getNickname())
 				.ifPresent(memberEntity -> {throw new AppException(ErrorCode.MEMBER_NICKNAME_DUPLICATED, "이미 사용중인 nickname 입니다.");});
 
-		memberRepository.save(MemberEntity.builder()
+		MemberEntity member = MemberEntity.builder()
 				.memberName(memberName)
 				.password(encoder.encode(dto.getPassword()))
 				.nickname(dto.getNickname())
 				.introduce(dto.getIntroduce())
-				.build());
+				.build();
 
-		return  JwtUtil.createToken(dto.getMemberName());
+		memberRepository.save(member);
+
+		MemberResponseDto memberResponseDto = MemberResponseDto.builder()
+				.memberId(member.getMemberId())
+				.memberName(member.getMemberName())
+				.nickname(member.getNickname())
+				.introduce(member.getIntroduce())
+				.isMe(true)
+				.createdAt(member.getCreatedAt())
+				.modifiedAt(member.getModifiedAt())
+				.build();
+
+		return  MemberTokenResponseDto.builder()
+				.memberInfo(memberResponseDto)
+				.accessToken(JwtUtil.createAccessToken(member.getMemberName()))
+				.refreshToken(JwtUtil.createRefreshToken(member.getMemberId()))
+				.build();
 	}
 
 	/**
 	 * 로그인
 	 */
-	public String login(MemberLoginRequestDto dto) {
+	public MemberTokenResponseDto login(MemberLoginRequestDto dto) {
 		MemberEntity selectedMember = memberRepository.findByMemberName(dto.getMemberName().toLowerCase())
 				.orElseThrow(() ->new AppException(ErrorCode.MEMBER_NAME_NOT_FOUND, "찾을 수 없는 memberName 입니다."));
 
@@ -138,7 +155,21 @@ public class MemberService {
 
 		loginLogRepository.save(loginLog);
 
-		return JwtUtil.createToken(selectedMember.getMemberName());
+		MemberResponseDto memberResponseDto = MemberResponseDto.builder()
+				.memberId(selectedMember.getMemberId())
+				.memberName(selectedMember.getMemberName())
+				.nickname(selectedMember.getNickname())
+				.introduce(selectedMember.getIntroduce())
+				.isMe(true)
+				.createdAt(selectedMember.getCreatedAt())
+				.modifiedAt(selectedMember.getModifiedAt())
+				.build();
+
+		return  MemberTokenResponseDto.builder()
+				.memberInfo(memberResponseDto)
+				.accessToken(JwtUtil.createAccessToken(selectedMember.getMemberName()))
+				.refreshToken(JwtUtil.createRefreshToken(selectedMember.getMemberId()))
+				.build();
 	}
 
 
