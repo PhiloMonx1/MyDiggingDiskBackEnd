@@ -12,14 +12,19 @@ import java.util.Date;
 public class JwtUtil {
 
 	private static String secretKey;
+	private static String refreshKey;
 	private static Long expireTimeMs = 1000 * 60 * 60 * 24L;
 
 	@Value("${jwt.secret}")
 	public void setSecretKey(String secret) {
 		JwtUtil.secretKey = secret;
 	}
+	@Value("${refreshKey.secret}")
+	public void setRefreshKey(String refreshKey) {
+		JwtUtil.refreshKey = refreshKey;
+	}
 
-	public static String createToken(String memberName) {
+	public static String createAccessToken(String memberName) {
 		String issuer = "MDD";
 		Algorithm hashKey = Algorithm.HMAC256(secretKey);
 		Date issuedTime = new Date();
@@ -31,7 +36,21 @@ public class JwtUtil {
 				.withIssuedAt(issuedTime)
 				.withExpiresAt(expirationTime)
 				.sign(hashKey);
+	}
 
+	public static String createRefreshToken(Long memberId) {
+		String issuer = "MDD";
+		Algorithm hashKey = Algorithm.HMAC256(refreshKey);
+		Date issuedTime = new Date();
+		Long refreshExpireTimeMs = 1000 * 60 * 60 * 24 * 7L;
+		Date expirationTime = new Date(issuedTime.getTime() + refreshExpireTimeMs);
+
+		return JWT.create()
+				.withIssuer(issuer)
+				.withClaim("memberId", memberId)
+				.withIssuedAt(issuedTime)
+				.withExpiresAt(expirationTime)
+				.sign(hashKey);
 	}
 
 	public static DecodedJWT decodedToken(String token){
