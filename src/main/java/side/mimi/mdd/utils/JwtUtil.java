@@ -2,9 +2,13 @@ package side.mimi.mdd.utils;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.exceptions.JWTDecodeException;
+import com.auth0.jwt.exceptions.TokenExpiredException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import side.mimi.mdd.exception.AppException;
+import side.mimi.mdd.exception.ErrorCode;
 
 import java.util.Date;
 
@@ -13,7 +17,7 @@ public class JwtUtil {
 
 	private static String secretKey;
 	private static String refreshKey;
-	private static Long expireTimeMs = 1000 * 60 * 60 * 24L;
+	private static Long expireTimeMs = 100000L;// * 60 * 60 * 24L;
 
 	@Value("${jwt.secret}")
 	public void setSecretKey(String secret) {
@@ -58,14 +62,15 @@ public class JwtUtil {
 			token = token.split(" ")[1];
 		}
 
-		return JWT.require(Algorithm.HMAC256(secretKey))
-				.build()
-				.verify(token);
-	}
-
-	public static Boolean isExpiredToken(String token) {
-		DecodedJWT decodedJWT = decodedToken(token);
-		return decodedJWT.getExpiresAt().before(new Date());
+		try {
+			return JWT.require(Algorithm.HMAC256(secretKey))
+					.build()
+					.verify(token);
+		}catch (TokenExpiredException e){
+			throw new AppException(ErrorCode.EXPIRED_TOKEN, ErrorCode.EXPIRED_TOKEN.getMessage());
+		}catch (JWTDecodeException e){
+			throw new AppException(ErrorCode.WRONG_TYPE_TOKEN, ErrorCode.WRONG_TYPE_TOKEN.getMessage());
+		}
 	}
 
 	public static String getMemberName(String token){
