@@ -20,7 +20,7 @@ public enum ErrorCode {
 	//조회 (Get)
 	NOT_FOUND_MEMBER(HttpStatus.NOT_FOUND, "해당 맴버를 찾을 수 없습니다."),
 	//가입 (Join)
-	EMPTY_JOIN_REQUEST(HttpStatus.BAD_REQUEST, "MemberName, password, nickname은 필수 값 입니다."),
+	EMPTY_JOIN_REQUEST(HttpStatus.BAD_REQUEST, "MemberName, password은 필수 값 입니다."),
 	MEMBER_NAME_DUPLICATED(HttpStatus.CONFLICT, "이미 사용중인 MemberName 입니다."),
 	MEMBER_NICKNAME_DUPLICATED(HttpStatus.CONFLICT, "이미 사용중인 nickname 입니다."),
 	WRONG_MEMBER_NAME_VALID(HttpStatus.BAD_REQUEST, "MemberName은 20자 이하의 영어와 숫자로만 이루어져 있어야 합니다."),

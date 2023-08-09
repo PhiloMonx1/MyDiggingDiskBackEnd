@@ -19,6 +19,7 @@ import side.mimi.mdd.restApi.Member.model.TokenEntity;
 import side.mimi.mdd.restApi.Member.repository.LoginLogRepository;
 import side.mimi.mdd.restApi.Member.repository.MemberRepository;
 import side.mimi.mdd.restApi.Member.repository.TokenRepository;
+import side.mimi.mdd.utils.CombineRandomNickname;
 import side.mimi.mdd.utils.JwtUtil;
 import side.mimi.mdd.utils.RegexUtils;
 
@@ -33,6 +34,8 @@ public class MemberService {
 	private final LoginLogRepository loginLogRepository;
 	private final TokenRepository tokenRepository;
 	private final BCryptPasswordEncoder encoder;
+	private final CombineRandomNickname generator = new CombineRandomNickname();
+
 
 	/**
 	 * 마이페이지
@@ -89,26 +92,24 @@ public class MemberService {
 	 */
 	public MemberTokenResponseDto join(MemberJoinRequestDto dto){
 
-		if(dto.getMemberName().isEmpty() || dto.getPassword().isEmpty() || dto.getNickname().isEmpty()) throw new AppException(ErrorCode.EMPTY_JOIN_REQUEST, ErrorCode.EMPTY_JOIN_REQUEST.getMessage());
+		if(dto.getMemberName().isEmpty() || dto.getPassword().isEmpty()) throw new AppException(ErrorCode.EMPTY_JOIN_REQUEST, ErrorCode.EMPTY_JOIN_REQUEST.getMessage());
 		String memberName = dto.getMemberName().toLowerCase();
+		String nickname = generator.getRandomNickname();
 
 		if(memberName.length() > 20 || !RegexUtils.isAlphanumeric(memberName))
 			throw new AppException(ErrorCode.WRONG_MEMBER_NAME_VALID, ErrorCode.WRONG_MEMBER_NAME_VALID.getMessage());
 		if(dto.getPassword().length() != 6 || !RegexUtils.isNumeric(dto.getPassword()))
 			throw new AppException(ErrorCode.WRONG_PASSWORD_VALID, ErrorCode.WRONG_PASSWORD_VALID.getMessage());
-		if(dto.getNickname().length() > 10) throw new AppException(ErrorCode.WRONG_NICKNAME_VALID, ErrorCode.WRONG_NICKNAME_VALID.getMessage());
-		if(dto.getIntroduce().length() > 30) throw new AppException(ErrorCode.WRONG_INTRODUCE_VALID, ErrorCode.WRONG_INTRODUCE_VALID.getMessage());
 
 		memberRepository.findByMemberName(memberName)
 				.ifPresent(memberEntity -> {throw new AppException(ErrorCode.MEMBER_NAME_DUPLICATED, ErrorCode.MEMBER_NAME_DUPLICATED.getMessage());});
-		memberRepository.findByNickname(dto.getNickname())
+		memberRepository.findByNickname(nickname)
 				.ifPresent(memberEntity -> {throw new AppException(ErrorCode.MEMBER_NICKNAME_DUPLICATED, ErrorCode.MEMBER_NICKNAME_DUPLICATED.getMessage());});
 
 		MemberEntity member = MemberEntity.builder()
 				.memberName(memberName)
 				.password(encoder.encode(dto.getPassword()))
-				.nickname(dto.getNickname())
-				.introduce(dto.getIntroduce())
+				.nickname(nickname)
 				.build();
 
 		memberRepository.save(member);

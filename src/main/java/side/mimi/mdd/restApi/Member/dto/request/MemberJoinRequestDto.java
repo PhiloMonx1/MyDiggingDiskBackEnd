@@ -8,6 +8,4 @@ import lombok.Getter;
 public class MemberJoinRequestDto {
 	private String memberName;
 	private String password;
-	private String nickname;
-	private String introduce;
 }
