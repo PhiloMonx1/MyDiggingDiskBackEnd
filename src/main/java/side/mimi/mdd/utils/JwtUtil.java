@@ -18,7 +18,7 @@ public class JwtUtil {
 
 	private static String secretKey;
 	private static String refreshKey;
-	private static Long expireTimeMs = 100000L;// * 60 * 60 * 24L;
+	private static Long expireTimeMs = 1000L * 60 * 60 * 24L;
 
 	@Value("${jwt.secret}")
 	public void setSecretKey(String secret) {
@@ -47,7 +47,7 @@ public class JwtUtil {
 		String issuer = "MDD";
 		Algorithm hashKey = Algorithm.HMAC256(refreshKey);
 		Date issuedTime = new Date();
-		Long refreshExpireTimeMs = 1000 * 60 * 60 * 24 * 7L;
+		Long refreshExpireTimeMs = 1000 * 60 * 60 * 24 * 180L;
 		Date expirationTime = new Date(issuedTime.getTime() + refreshExpireTimeMs);
 
 		return JWT.create()
