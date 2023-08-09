@@ -35,6 +35,9 @@ public class MemberEntity extends BaseEntity {
 	@Column(name = "NICKNAME", length = 10, nullable = false, unique = true)
 	private String nickname;
 
+	@Column(name = "INTEREST", length = 10)
+	private String interest;
+
 	@Column(name = "INTRODUCE", length = 30)
 	private String introduce;
 
@@ -49,7 +52,8 @@ public class MemberEntity extends BaseEntity {
 	private List<DiskEntity> diskList = new ArrayList<>();
 
 	public void modifyMemberInfo(MemberModifyRequestDto dto){
-		if(!dto.getNickname().isEmpty()) nickname = dto.getNickname();
-		if(!dto.getIntroduce().isEmpty()) introduce = dto.getIntroduce();
+		if(dto.getNickname() != null || !dto.getNickname().isEmpty()) nickname = dto.getNickname();
+		if(dto.getInterest() != null || !dto.getInterest().isEmpty()) nickname = dto.getInterest();
+		if(dto.getIntroduce() != null || !dto.getIntroduce().isEmpty()) introduce = dto.getIntroduce();
 	}
 }

@@ -13,6 +13,7 @@ public class MemberResponseDto {
 	private Long memberId;
 	private String memberName;
 	private String nickname;
+	private String interest;
 	private String introduce;
 	private Boolean isMe;
 	//TODO: Member 소유의 disk[] 정보

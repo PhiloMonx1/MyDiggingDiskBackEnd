@@ -48,6 +48,7 @@ public class MemberService {
 				.memberId(member.getMemberId())
 				.memberName(member.getMemberName())
 				.nickname(member.getNickname())
+				.interest(member.getInterest())
 				.introduce(member.getIntroduce())
 				.isMe(true)
 				.build();
@@ -67,6 +68,7 @@ public class MemberService {
 				.memberId(member.getMemberId())
 				.memberName(member.getMemberName())
 				.nickname(member.getNickname())
+				.interest(member.getInterest())
 				.introduce(member.getIntroduce())
 				.isMe(memberByJwt != null && member.getMemberName().equals(memberByJwt.getMemberName()))
 				.build();
@@ -110,6 +112,9 @@ public class MemberService {
 				.memberName(memberName)
 				.password(encoder.encode(dto.getPassword()))
 				.nickname(nickname)
+				.interest("")
+				.introduce("")
+				.visitCount(0)
 				.build();
 
 		memberRepository.save(member);
@@ -118,6 +123,7 @@ public class MemberService {
 				.memberId(member.getMemberId())
 				.memberName(member.getMemberName())
 				.nickname(member.getNickname())
+				.interest(member.getInterest())
 				.introduce(member.getIntroduce())
 				.isMe(true)
 				.createdAt(member.getCreatedAt())
@@ -169,6 +175,7 @@ public class MemberService {
 				.memberId(selectedMember.getMemberId())
 				.memberName(selectedMember.getMemberName())
 				.nickname(selectedMember.getNickname())
+				.interest(selectedMember.getInterest())
 				.introduce(selectedMember.getIntroduce())
 				.isMe(true)
 				.createdAt(selectedMember.getCreatedAt())
@@ -230,6 +237,7 @@ public class MemberService {
 				.memberId(member.getMemberId())
 				.memberName(member.getMemberName())
 				.nickname(member.getNickname())
+				.interest(member.getInterest())
 				.introduce(member.getIntroduce())
 				.isMe(true)
 				.createdAt(member.getCreatedAt())
