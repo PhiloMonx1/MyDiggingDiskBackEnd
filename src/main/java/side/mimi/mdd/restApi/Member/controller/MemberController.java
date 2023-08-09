@@ -81,6 +81,9 @@ public class MemberController {
 		return ResponseEntity.ok().body(memberService.removeMember(token));
 	}
 
+	/**
+	 * 토큰 재발급
+	 */
 	@GetMapping("/reissue")
 	public ResponseEntity<MemberTokenResponseDto> reissueToken(@RequestBody String refreshToken){
 		return ResponseEntity.ok().body(memberService.reissueToken(refreshToken));
