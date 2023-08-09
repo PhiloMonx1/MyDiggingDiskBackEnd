@@ -44,13 +44,20 @@ public class MemberService {
 
 		MemberEntity member = getMemberByJwt(token);
 
+		//TODO : 맴버가 가진 모든 디스크의 like 수를 더한 값
+		Integer likeCnt = 0;
+
 		return MemberResponseDto.builder()
 				.memberId(member.getMemberId())
 				.memberName(member.getMemberName())
 				.nickname(member.getNickname())
 				.interest(member.getInterest())
 				.introduce(member.getIntroduce())
+				.visitCount(member.getVisitCount())
+				.likeCount(likeCnt)
 				.isMe(true)
+				.createdAt(member.getCreatedAt())
+				.modifiedAt(member.getModifiedAt())
 				.build();
 	}
 
@@ -64,13 +71,20 @@ public class MemberService {
 
 		MemberEntity memberByJwt = getMemberByJwt(token);
 
+		//TODO : 맴버가 가진 모든 디스크의 like 수를 더한 값
+		Integer likeCnt = 0;
+
 		return MemberResponseDto.builder()
 				.memberId(member.getMemberId())
 				.memberName(member.getMemberName())
 				.nickname(member.getNickname())
 				.interest(member.getInterest())
 				.introduce(member.getIntroduce())
+				.visitCount(member.getVisitCount())
+				.likeCount(likeCnt)
 				.isMe(memberByJwt != null && member.getMemberName().equals(memberByJwt.getMemberName()))
+				.createdAt(member.getCreatedAt())
+				.modifiedAt(member.getModifiedAt())
 				.build();
 	}
 
