@@ -210,10 +210,13 @@ public class MemberService {
 		if(dto.getNickname().length() > 10) throw new AppException(ErrorCode.WRONG_NICKNAME_VALID, ErrorCode.WRONG_NICKNAME_VALID.getMessage());
 		if(dto.getIntroduce().length() > 30) throw new AppException(ErrorCode.WRONG_INTRODUCE_VALID, ErrorCode.WRONG_INTRODUCE_VALID.getMessage());
 
-		memberRepository.findByNickname(dto.getNickname())
-				.ifPresent(memberEntity -> {throw new AppException(ErrorCode.MEMBER_NICKNAME_DUPLICATED, ErrorCode.MEMBER_NICKNAME_DUPLICATED.getMessage());});
-
 		MemberEntity member = getMemberByJwt(token);
+
+		if(!member.getNickname().equals(dto.getNickname())){
+			memberRepository.findByNickname(dto.getNickname())
+					.ifPresent(memberEntity -> {throw new AppException(ErrorCode.MEMBER_NICKNAME_DUPLICATED, ErrorCode.MEMBER_NICKNAME_DUPLICATED.getMessage());});
+		}
+
 
 		member.modifyMemberInfo(dto);
 		memberRepository.save(member);
