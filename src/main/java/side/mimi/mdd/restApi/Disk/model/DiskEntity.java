@@ -36,6 +36,10 @@ public class DiskEntity extends BaseEntity {
 	@Column(name = "IS_PRIVATE")
 	private boolean isPrivate;
 
+	//TODO : isFavorite 추가
+	//TODO : likeCount 추가
+	//TODO : diskImgIdList 추가
+
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JsonBackReference
 	@JoinColumn(name = "MEMBER_ID")

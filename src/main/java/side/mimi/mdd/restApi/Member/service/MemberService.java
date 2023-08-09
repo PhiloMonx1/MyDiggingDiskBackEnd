@@ -19,6 +19,7 @@ import side.mimi.mdd.restApi.Member.model.TokenEntity;
 import side.mimi.mdd.restApi.Member.repository.LoginLogRepository;
 import side.mimi.mdd.restApi.Member.repository.MemberRepository;
 import side.mimi.mdd.restApi.Member.repository.TokenRepository;
+import side.mimi.mdd.utils.CombineRandomNickname;
 import side.mimi.mdd.utils.JwtUtil;
 import side.mimi.mdd.utils.RegexUtils;
 
@@ -33,6 +34,8 @@ public class MemberService {
 	private final LoginLogRepository loginLogRepository;
 	private final TokenRepository tokenRepository;
 	private final BCryptPasswordEncoder encoder;
+	private final CombineRandomNickname generator = new CombineRandomNickname();
+
 
 	/**
 	 * 마이페이지
@@ -41,12 +44,20 @@ public class MemberService {
 
 		MemberEntity member = getMemberByJwt(token);
 
+		//TODO : 맴버가 가진 모든 디스크의 like 수를 더한 값
+		Integer likeCnt = 0;
+
 		return MemberResponseDto.builder()
 				.memberId(member.getMemberId())
 				.memberName(member.getMemberName())
 				.nickname(member.getNickname())
+				.interest(member.getInterest())
 				.introduce(member.getIntroduce())
+				.visitCount(member.getVisitCount())
+				.likeCount(likeCnt)
 				.isMe(true)
+				.createdAt(member.getCreatedAt())
+				.modifiedAt(member.getModifiedAt())
 				.build();
 	}
 
@@ -60,12 +71,20 @@ public class MemberService {
 
 		MemberEntity memberByJwt = getMemberByJwt(token);
 
+		//TODO : 맴버가 가진 모든 디스크의 like 수를 더한 값
+		Integer likeCnt = 0;
+
 		return MemberResponseDto.builder()
 				.memberId(member.getMemberId())
 				.memberName(member.getMemberName())
 				.nickname(member.getNickname())
+				.interest(member.getInterest())
 				.introduce(member.getIntroduce())
+				.visitCount(member.getVisitCount())
+				.likeCount(likeCnt)
 				.isMe(memberByJwt != null && member.getMemberName().equals(memberByJwt.getMemberName()))
+				.createdAt(member.getCreatedAt())
+				.modifiedAt(member.getModifiedAt())
 				.build();
 	}
 
@@ -89,26 +108,27 @@ public class MemberService {
 	 */
 	public MemberTokenResponseDto join(MemberJoinRequestDto dto){
 
-		if(dto.getMemberName().isEmpty() || dto.getPassword().isEmpty() || dto.getNickname().isEmpty()) throw new AppException(ErrorCode.EMPTY_JOIN_REQUEST, ErrorCode.EMPTY_JOIN_REQUEST.getMessage());
+		if(dto.getMemberName().isEmpty() || dto.getPassword().isEmpty()) throw new AppException(ErrorCode.EMPTY_JOIN_REQUEST, ErrorCode.EMPTY_JOIN_REQUEST.getMessage());
 		String memberName = dto.getMemberName().toLowerCase();
+		String nickname = generator.getRandomNickname();
 
 		if(memberName.length() > 20 || !RegexUtils.isAlphanumeric(memberName))
 			throw new AppException(ErrorCode.WRONG_MEMBER_NAME_VALID, ErrorCode.WRONG_MEMBER_NAME_VALID.getMessage());
 		if(dto.getPassword().length() != 6 || !RegexUtils.isNumeric(dto.getPassword()))
 			throw new AppException(ErrorCode.WRONG_PASSWORD_VALID, ErrorCode.WRONG_PASSWORD_VALID.getMessage());
-		if(dto.getNickname().length() > 10) throw new AppException(ErrorCode.WRONG_NICKNAME_VALID, ErrorCode.WRONG_NICKNAME_VALID.getMessage());
-		if(dto.getIntroduce().length() > 30) throw new AppException(ErrorCode.WRONG_INTRODUCE_VALID, ErrorCode.WRONG_INTRODUCE_VALID.getMessage());
 
 		memberRepository.findByMemberName(memberName)
 				.ifPresent(memberEntity -> {throw new AppException(ErrorCode.MEMBER_NAME_DUPLICATED, ErrorCode.MEMBER_NAME_DUPLICATED.getMessage());});
-		memberRepository.findByNickname(dto.getNickname())
+		memberRepository.findByNickname(nickname)
 				.ifPresent(memberEntity -> {throw new AppException(ErrorCode.MEMBER_NICKNAME_DUPLICATED, ErrorCode.MEMBER_NICKNAME_DUPLICATED.getMessage());});
 
 		MemberEntity member = MemberEntity.builder()
 				.memberName(memberName)
 				.password(encoder.encode(dto.getPassword()))
-				.nickname(dto.getNickname())
-				.introduce(dto.getIntroduce())
+				.nickname(nickname)
+				.interest("")
+				.introduce("")
+				.visitCount(0)
 				.build();
 
 		memberRepository.save(member);
@@ -117,7 +137,10 @@ public class MemberService {
 				.memberId(member.getMemberId())
 				.memberName(member.getMemberName())
 				.nickname(member.getNickname())
+				.interest(member.getInterest())
 				.introduce(member.getIntroduce())
+				.visitCount(member.getVisitCount())
+				.likeCount(0)
 				.isMe(true)
 				.createdAt(member.getCreatedAt())
 				.modifiedAt(member.getModifiedAt())
@@ -164,11 +187,17 @@ public class MemberService {
 
 		loginLogRepository.save(loginLog);
 
+		//TODO : 맴버가 가진 모든 디스크의 like 수를 더한 값
+		Integer likeCnt = 0;
+
 		MemberResponseDto memberResponseDto = MemberResponseDto.builder()
 				.memberId(selectedMember.getMemberId())
 				.memberName(selectedMember.getMemberName())
 				.nickname(selectedMember.getNickname())
+				.interest(selectedMember.getInterest())
 				.introduce(selectedMember.getIntroduce())
+				.visitCount(selectedMember.getVisitCount())
+				.likeCount(likeCnt)
 				.isMe(true)
 				.createdAt(selectedMember.getCreatedAt())
 				.modifiedAt(selectedMember.getModifiedAt())
@@ -195,10 +224,13 @@ public class MemberService {
 		if(dto.getNickname().length() > 10) throw new AppException(ErrorCode.WRONG_NICKNAME_VALID, ErrorCode.WRONG_NICKNAME_VALID.getMessage());
 		if(dto.getIntroduce().length() > 30) throw new AppException(ErrorCode.WRONG_INTRODUCE_VALID, ErrorCode.WRONG_INTRODUCE_VALID.getMessage());
 
-		memberRepository.findByNickname(dto.getNickname())
-				.ifPresent(memberEntity -> {throw new AppException(ErrorCode.MEMBER_NICKNAME_DUPLICATED, ErrorCode.MEMBER_NICKNAME_DUPLICATED.getMessage());});
-
 		MemberEntity member = getMemberByJwt(token);
+
+		if(!member.getNickname().equals(dto.getNickname())){
+			memberRepository.findByNickname(dto.getNickname())
+					.ifPresent(memberEntity -> {throw new AppException(ErrorCode.MEMBER_NICKNAME_DUPLICATED, ErrorCode.MEMBER_NICKNAME_DUPLICATED.getMessage());});
+		}
+
 
 		member.modifyMemberInfo(dto);
 		memberRepository.save(member);
@@ -225,11 +257,17 @@ public class MemberService {
 		MemberEntity member = memberRepository.findById(memberId)
 				.orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND_MEMBER, ErrorCode.NOT_FOUND_MEMBER.getMessage()));
 
+		//TODO : 맴버가 가진 모든 디스크의 like 수를 더한 값
+		Integer likeCnt = 0;
+
 		MemberResponseDto memberResponseDto = MemberResponseDto.builder()
 				.memberId(member.getMemberId())
 				.memberName(member.getMemberName())
 				.nickname(member.getNickname())
+				.interest(member.getInterest())
 				.introduce(member.getIntroduce())
+				.visitCount(member.getVisitCount())
+				.likeCount(likeCnt)
 				.isMe(true)
 				.createdAt(member.getCreatedAt())
 				.modifiedAt(member.getModifiedAt())

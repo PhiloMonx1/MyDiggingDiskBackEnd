@@ -7,5 +7,6 @@ import lombok.Getter;
 @Getter
 public class MemberModifyRequestDto {
 	private String nickname;
+	private String interest;
 	private String introduce;
 }
