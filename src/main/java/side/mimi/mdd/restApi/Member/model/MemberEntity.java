@@ -38,6 +38,12 @@ public class MemberEntity extends BaseEntity {
 	@Column(name = "INTRODUCE", length = 30)
 	private String introduce;
 
+	@Column(name = "VISIT_COUNT")
+	private Integer visitCount;
+
+	@Column(name = "PROFILE_IMG")
+	private String profileImg;
+
 	@OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
 	@JsonManagedReference
 	private List<DiskEntity> diskList = new ArrayList<>();
