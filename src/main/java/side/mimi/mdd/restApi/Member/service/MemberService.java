@@ -15,8 +15,10 @@ import side.mimi.mdd.restApi.Member.dto.response.MemberResponseDto;
 import side.mimi.mdd.restApi.Member.dto.response.MemberTokenResponseDto;
 import side.mimi.mdd.restApi.Member.model.LoginLogEntity;
 import side.mimi.mdd.restApi.Member.model.MemberEntity;
+import side.mimi.mdd.restApi.Member.model.TokenEntity;
 import side.mimi.mdd.restApi.Member.repository.LoginLogRepository;
 import side.mimi.mdd.restApi.Member.repository.MemberRepository;
+import side.mimi.mdd.restApi.Member.repository.TokenRepository;
 import side.mimi.mdd.utils.JwtUtil;
 import side.mimi.mdd.utils.RegexUtils;
 
@@ -29,6 +31,7 @@ public class MemberService {
 
 	private final MemberRepository memberRepository;
 	private final LoginLogRepository loginLogRepository;
+	private final TokenRepository tokenRepository;
 	private final BCryptPasswordEncoder encoder;
 
 	/**
@@ -120,10 +123,16 @@ public class MemberService {
 				.modifiedAt(member.getModifiedAt())
 				.build();
 
+		String refreshToken = JwtUtil.createRefreshToken(member.getMemberId());
+		tokenRepository.save(TokenEntity.builder()
+						.memberId(member.getMemberId())
+						.token(refreshToken)
+				.build());
+
 		return  MemberTokenResponseDto.builder()
 				.memberInfo(memberResponseDto)
 				.accessToken(JwtUtil.createAccessToken(member.getMemberName()))
-				.refreshToken(JwtUtil.createRefreshToken(member.getMemberId()))
+				.refreshToken(refreshToken)
 				.build();
 	}
 
@@ -165,10 +174,16 @@ public class MemberService {
 				.modifiedAt(selectedMember.getModifiedAt())
 				.build();
 
+		String refreshToken = JwtUtil.createRefreshToken(selectedMember.getMemberId());
+		tokenRepository.save(TokenEntity.builder()
+				.memberId(selectedMember.getMemberId())
+				.token(refreshToken)
+				.build());
+
 		return  MemberTokenResponseDto.builder()
 				.memberInfo(memberResponseDto)
 				.accessToken(JwtUtil.createAccessToken(selectedMember.getMemberName()))
-				.refreshToken(JwtUtil.createRefreshToken(selectedMember.getMemberId()))
+				.refreshToken(refreshToken)
 				.build();
 	}
 
