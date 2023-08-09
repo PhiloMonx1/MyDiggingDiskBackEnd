@@ -7,6 +7,7 @@ import side.mimi.mdd.restApi.Member.dto.request.MemberJoinRequestDto;
 import side.mimi.mdd.restApi.Member.dto.request.MemberLoginRequestDto;
 import side.mimi.mdd.restApi.Member.dto.request.MemberModifyRequestDto;
 import side.mimi.mdd.restApi.Member.dto.response.MemberResponseDto;
+import side.mimi.mdd.restApi.Member.dto.response.MemberTokenResponseDto;
 import side.mimi.mdd.restApi.Member.service.MemberService;
 
 @RestController
@@ -52,18 +53,16 @@ public class MemberController {
 	 * 회원가입
 	 */
 	@PostMapping("/join")
-	public ResponseEntity<String> join(@RequestBody MemberJoinRequestDto dto){
-		String token = memberService.join(dto);
-		return ResponseEntity.ok().body(token);
+	public ResponseEntity<MemberTokenResponseDto> join(@RequestBody MemberJoinRequestDto dto){
+		return ResponseEntity.ok().body(memberService.join(dto));
 	}
 
 	/**
 	 * 로그인
 	 */
 	@PostMapping("/login")
-	public ResponseEntity<String> login(@RequestBody MemberLoginRequestDto dto){
-		String token = memberService.login(dto);
-		return ResponseEntity.ok().body(token);
+	public ResponseEntity<MemberTokenResponseDto> login(@RequestBody MemberLoginRequestDto dto){
+		return ResponseEntity.ok().body(memberService.login(dto));
 	}
 
 	/**
@@ -81,4 +80,10 @@ public class MemberController {
 	public ResponseEntity<Boolean> removeMember(@RequestHeader(name="Authorization") String token){
 		return ResponseEntity.ok().body(memberService.removeMember(token));
 	}
+
+	@GetMapping("/reissue")
+	public ResponseEntity<MemberTokenResponseDto> reissueToken(@RequestBody String refreshToken){
+		return ResponseEntity.ok().body(memberService.reissueToken(refreshToken));
+	}
+
 }

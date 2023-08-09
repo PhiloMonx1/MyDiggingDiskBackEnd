@@ -42,7 +42,7 @@ public class DiskService {
 		MemberEntity member = memberService.getMemberByJwt(token);
 
 		DiskEntity disk = diskRepository.findById(diskId)
-				.orElseThrow(() ->new AppException(ErrorCode.NOT_FOUND_DISK, "해당 DiskId를 가진 Disk를 찾을 수 없습니다."));
+				.orElseThrow(() ->new AppException(ErrorCode.NOT_FOUND_DISK, ErrorCode.NOT_FOUND_DISK.getMessage()));
 
 		return DiskResponseDto.builder()
 				.diskId(disk.getDiskId())
@@ -59,8 +59,8 @@ public class DiskService {
 	public DiskResponseDto postDisk(DiskPostRequestDto dto, String token) {
 		MemberEntity member = memberService.getMemberByJwt(token);
 
-		if(dto.getDiskName().length() > 30) throw new AppException(ErrorCode.OVER_LONG_DISK_NAME, "DiskName 값은 30자를 초과할 수 없습니다.");
-		if(dto.getContent().length() > 300) throw new AppException(ErrorCode.OVER_LONG_CONTENT, "content 값은 300자를 초과할 수 없습니다.");
+		if(dto.getDiskName().length() > 30) throw new AppException(ErrorCode.OVER_LONG_DISK_NAME, ErrorCode.OVER_LONG_DISK_NAME.getMessage());
+		if(dto.getContent().length() > 300) throw new AppException(ErrorCode.OVER_LONG_CONTENT, ErrorCode.OVER_LONG_CONTENT.getMessage());
 
 		//isPrivate Default값 부여
 		Boolean isPrivate = false;
@@ -94,11 +94,11 @@ public class DiskService {
 		MemberEntity member = memberService.getMemberByJwt(token);
 
 		DiskEntity myDisk = diskRepository.findById(diskId)
-						.orElseThrow(() ->new AppException(ErrorCode.NOT_FOUND_DISK, "해당 DiskId를 가진 Disk를 찾을 수 없습니다."));
+						.orElseThrow(() ->new AppException(ErrorCode.NOT_FOUND_DISK, ErrorCode.NOT_FOUND_DISK.getMessage()));
 
-		if(myDisk.getMember().getMemberId() != member.getMemberId()) throw new AppException(ErrorCode.NOT_DISK_OWNER, "Disk 소유자만 수정 권한이 주어집니다.");
-		if(dto.getDiskName() != null && dto.getDiskName().length() > 30) throw new AppException(ErrorCode.OVER_LONG_DISK_NAME, "DiskName 값은 30자를 초과할 수 없습니다.");
-		if(dto.getContent() != null && dto.getContent().length() > 300) throw new AppException(ErrorCode.OVER_LONG_CONTENT, "content 값은 300자를 초과할 수 없습니다.");
+		if(myDisk.getMember().getMemberId() != member.getMemberId()) throw new AppException(ErrorCode.NOT_DISK_OWNER, ErrorCode.NOT_DISK_OWNER.getMessage());
+		if(dto.getDiskName() != null && dto.getDiskName().length() > 30) throw new AppException(ErrorCode.OVER_LONG_DISK_NAME, ErrorCode.OVER_LONG_DISK_NAME.getMessage());
+		if(dto.getContent() != null && dto.getContent().length() > 300) throw new AppException(ErrorCode.OVER_LONG_CONTENT, ErrorCode.OVER_LONG_CONTENT.getMessage());
 
 		myDisk.modifyDisk(dto);
 		diskRepository.save(myDisk);
@@ -110,9 +110,9 @@ public class DiskService {
 		MemberEntity member = memberService.getMemberByJwt(token);
 
 		DiskEntity myDisk = diskRepository.findById(diskId)
-				.orElseThrow(() ->new AppException(ErrorCode.NOT_FOUND_DISK, "해당 DiskId를 가진 Disk를 찾을 수 없습니다."));
+				.orElseThrow(() ->new AppException(ErrorCode.NOT_FOUND_DISK, ErrorCode.NOT_FOUND_DISK.getMessage()));
 
-		if(myDisk.getMember().getMemberId() != member.getMemberId()) throw new AppException(ErrorCode.NOT_DISK_OWNER, "Disk 소유자만 삭제 권한이 주어집니다.");
+		if(myDisk.getMember().getMemberId() != member.getMemberId()) throw new AppException(ErrorCode.NOT_DISK_OWNER, ErrorCode.NOT_DISK_OWNER.getMessage());
 
 		diskRepository.delete(myDisk);
 		return true;

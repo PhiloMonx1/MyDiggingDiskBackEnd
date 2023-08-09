@@ -12,10 +12,13 @@ import side.mimi.mdd.restApi.Member.dto.request.MemberJoinRequestDto;
 import side.mimi.mdd.restApi.Member.dto.request.MemberLoginRequestDto;
 import side.mimi.mdd.restApi.Member.dto.request.MemberModifyRequestDto;
 import side.mimi.mdd.restApi.Member.dto.response.MemberResponseDto;
+import side.mimi.mdd.restApi.Member.dto.response.MemberTokenResponseDto;
 import side.mimi.mdd.restApi.Member.model.LoginLogEntity;
 import side.mimi.mdd.restApi.Member.model.MemberEntity;
+import side.mimi.mdd.restApi.Member.model.TokenEntity;
 import side.mimi.mdd.restApi.Member.repository.LoginLogRepository;
 import side.mimi.mdd.restApi.Member.repository.MemberRepository;
+import side.mimi.mdd.restApi.Member.repository.TokenRepository;
 import side.mimi.mdd.utils.JwtUtil;
 import side.mimi.mdd.utils.RegexUtils;
 
@@ -28,6 +31,7 @@ public class MemberService {
 
 	private final MemberRepository memberRepository;
 	private final LoginLogRepository loginLogRepository;
+	private final TokenRepository tokenRepository;
 	private final BCryptPasswordEncoder encoder;
 
 	/**
@@ -52,7 +56,7 @@ public class MemberService {
 	public MemberResponseDto getMember(Long memberId, String token) {
 
 		MemberEntity member = memberRepository.findById(memberId)
-				.orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND_MEMBER, "해당 id의 맴버를 찾을 수 없습니다."));
+				.orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND_MEMBER, ErrorCode.NOT_FOUND_MEMBER.getMessage()));
 
 		MemberEntity memberByJwt = getMemberByJwt(token);
 
@@ -83,42 +87,64 @@ public class MemberService {
 	/**
 	 * 회원가입
 	 */
-	public String join(MemberJoinRequestDto dto){
+	public MemberTokenResponseDto join(MemberJoinRequestDto dto){
 
-		if(dto.getMemberName().isEmpty() || dto.getPassword().isEmpty() || dto.getNickname().isEmpty()) throw new AppException(ErrorCode.WRONG_MEMBER_NAME_VALID, "MemberName, password, nickname은 필수 값 입니다.");
+		if(dto.getMemberName().isEmpty() || dto.getPassword().isEmpty() || dto.getNickname().isEmpty()) throw new AppException(ErrorCode.EMPTY_JOIN_REQUEST, ErrorCode.EMPTY_JOIN_REQUEST.getMessage());
 		String memberName = dto.getMemberName().toLowerCase();
 
 		if(memberName.length() > 20 || !RegexUtils.isAlphanumeric(memberName))
-			throw new AppException(ErrorCode.WRONG_MEMBER_NAME_VALID, "MemberName은 20자 이하의 영어와 숫자로만 이루어져 있어야 합니다.");
+			throw new AppException(ErrorCode.WRONG_MEMBER_NAME_VALID, ErrorCode.WRONG_MEMBER_NAME_VALID.getMessage());
 		if(dto.getPassword().length() != 6 || !RegexUtils.isNumeric(dto.getPassword()))
-			throw new AppException(ErrorCode.WRONG_PASSWORD_VALID, "password는 6자리 숫자로만 이루어져 있어야 합니다.");
-		if(dto.getNickname().length() > 10) throw new AppException(ErrorCode.WRONG_NICKNAME_VALID, "nickname은 10자를 초과할 수 없습니다.");
-		if(dto.getIntroduce().length() > 30) throw new AppException(ErrorCode.WRONG_INTRODUCE_VALID, "introduce는 30자를 초과할 수 없습니다.");
+			throw new AppException(ErrorCode.WRONG_PASSWORD_VALID, ErrorCode.WRONG_PASSWORD_VALID.getMessage());
+		if(dto.getNickname().length() > 10) throw new AppException(ErrorCode.WRONG_NICKNAME_VALID, ErrorCode.WRONG_NICKNAME_VALID.getMessage());
+		if(dto.getIntroduce().length() > 30) throw new AppException(ErrorCode.WRONG_INTRODUCE_VALID, ErrorCode.WRONG_INTRODUCE_VALID.getMessage());
 
 		memberRepository.findByMemberName(memberName)
-				.ifPresent(memberEntity -> {throw new AppException(ErrorCode.MEMBER_NAME_DUPLICATED, "이미 사용중인 MemberName 입니다.");});
+				.ifPresent(memberEntity -> {throw new AppException(ErrorCode.MEMBER_NAME_DUPLICATED, ErrorCode.MEMBER_NAME_DUPLICATED.getMessage());});
 		memberRepository.findByNickname(dto.getNickname())
-				.ifPresent(memberEntity -> {throw new AppException(ErrorCode.MEMBER_NICKNAME_DUPLICATED, "이미 사용중인 nickname 입니다.");});
+				.ifPresent(memberEntity -> {throw new AppException(ErrorCode.MEMBER_NICKNAME_DUPLICATED, ErrorCode.MEMBER_NICKNAME_DUPLICATED.getMessage());});
 
-		memberRepository.save(MemberEntity.builder()
+		MemberEntity member = MemberEntity.builder()
 				.memberName(memberName)
 				.password(encoder.encode(dto.getPassword()))
 				.nickname(dto.getNickname())
 				.introduce(dto.getIntroduce())
+				.build();
+
+		memberRepository.save(member);
+
+		MemberResponseDto memberResponseDto = MemberResponseDto.builder()
+				.memberId(member.getMemberId())
+				.memberName(member.getMemberName())
+				.nickname(member.getNickname())
+				.introduce(member.getIntroduce())
+				.isMe(true)
+				.createdAt(member.getCreatedAt())
+				.modifiedAt(member.getModifiedAt())
+				.build();
+
+		String refreshToken = JwtUtil.createRefreshToken(member.getMemberId());
+		tokenRepository.save(TokenEntity.builder()
+						.memberId(member.getMemberId())
+						.token(refreshToken)
 				.build());
 
-		return  JwtUtil.createToken(dto.getMemberName());
+		return  MemberTokenResponseDto.builder()
+				.memberInfo(memberResponseDto)
+				.accessToken(JwtUtil.createAccessToken(member.getMemberName()))
+				.refreshToken(refreshToken)
+				.build();
 	}
 
 	/**
 	 * 로그인
 	 */
-	public String login(MemberLoginRequestDto dto) {
+	public MemberTokenResponseDto login(MemberLoginRequestDto dto) {
 		MemberEntity selectedMember = memberRepository.findByMemberName(dto.getMemberName().toLowerCase())
-				.orElseThrow(() ->new AppException(ErrorCode.MEMBER_NAME_NOT_FOUND, "찾을 수 없는 memberName 입니다."));
+				.orElseThrow(() ->new AppException(ErrorCode.MEMBER_NAME_NOT_FOUND, ErrorCode.MEMBER_NAME_NOT_FOUND.getMessage()));
 
 		if (isLoginOverFailed(dto.getMemberName().toLowerCase()))
-			throw new AppException(ErrorCode.OVER_INVALID_PASSWORD, "너무 많은 로그인 시도를 했습니다. 잠시 후 다시 시도해주세요.");
+			throw new AppException(ErrorCode.OVER_INVALID_PASSWORD, ErrorCode.OVER_INVALID_PASSWORD.getMessage());
 
 
 		if(!encoder.matches(dto.getPassword(), selectedMember.getPassword())){
@@ -128,7 +154,7 @@ public class MemberService {
 					.build();
 
 			loginLogRepository.save(loginLog);
-			throw new AppException(ErrorCode.INVALID_PASSWORD, "비밀번호가 일치하지 않습니다.");
+			throw new AppException(ErrorCode.INVALID_PASSWORD, ErrorCode.INVALID_PASSWORD.getMessage());
 		}
 
 		LoginLogEntity loginLog = LoginLogEntity.builder()
@@ -138,7 +164,27 @@ public class MemberService {
 
 		loginLogRepository.save(loginLog);
 
-		return JwtUtil.createToken(selectedMember.getMemberName());
+		MemberResponseDto memberResponseDto = MemberResponseDto.builder()
+				.memberId(selectedMember.getMemberId())
+				.memberName(selectedMember.getMemberName())
+				.nickname(selectedMember.getNickname())
+				.introduce(selectedMember.getIntroduce())
+				.isMe(true)
+				.createdAt(selectedMember.getCreatedAt())
+				.modifiedAt(selectedMember.getModifiedAt())
+				.build();
+
+		String refreshToken = JwtUtil.createRefreshToken(selectedMember.getMemberId());
+		tokenRepository.save(TokenEntity.builder()
+				.memberId(selectedMember.getMemberId())
+				.token(refreshToken)
+				.build());
+
+		return  MemberTokenResponseDto.builder()
+				.memberInfo(memberResponseDto)
+				.accessToken(JwtUtil.createAccessToken(selectedMember.getMemberName()))
+				.refreshToken(refreshToken)
+				.build();
 	}
 
 
@@ -146,11 +192,11 @@ public class MemberService {
 	 * 회원 정보 수정
 	 */
 	public Long modifyMemberInfo(MemberModifyRequestDto dto, String token) {
-		if(dto.getNickname().length() > 10) throw new AppException(ErrorCode.WRONG_NICKNAME_VALID, "nickname은 10자를 초과할 수 없습니다.");
-		if(dto.getIntroduce().length() > 30) throw new AppException(ErrorCode.WRONG_INTRODUCE_VALID, "introduce는 30자를 초과할 수 없습니다.");
+		if(dto.getNickname().length() > 10) throw new AppException(ErrorCode.WRONG_NICKNAME_VALID, ErrorCode.WRONG_NICKNAME_VALID.getMessage());
+		if(dto.getIntroduce().length() > 30) throw new AppException(ErrorCode.WRONG_INTRODUCE_VALID, ErrorCode.WRONG_INTRODUCE_VALID.getMessage());
 
 		memberRepository.findByNickname(dto.getNickname())
-				.ifPresent(memberEntity -> {throw new AppException(ErrorCode.MEMBER_NICKNAME_DUPLICATED, "이미 사용중인 nickname 입니다.");});
+				.ifPresent(memberEntity -> {throw new AppException(ErrorCode.MEMBER_NICKNAME_DUPLICATED, ErrorCode.MEMBER_NICKNAME_DUPLICATED.getMessage());});
 
 		MemberEntity member = getMemberByJwt(token);
 
@@ -166,6 +212,30 @@ public class MemberService {
 		MemberEntity member = getMemberByJwt(token);
 		memberRepository.deleteById(member.getMemberId());
 		return true;
+	}
+
+	public MemberTokenResponseDto reissueToken(String refreshToken) {
+		Long memberId = JwtUtil.verifyRefreshToken(refreshToken);
+		tokenRepository.findById(memberId)
+				.orElseThrow(()-> new AppException(ErrorCode.BLACKLIST_TOKEN, ErrorCode.BLACKLIST_TOKEN.getMessage()));
+		MemberEntity member = memberRepository.findById(memberId)
+				.orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND_MEMBER, ErrorCode.NOT_FOUND_MEMBER.getMessage()));
+
+		MemberResponseDto memberResponseDto = MemberResponseDto.builder()
+				.memberId(member.getMemberId())
+				.memberName(member.getMemberName())
+				.nickname(member.getNickname())
+				.introduce(member.getIntroduce())
+				.isMe(true)
+				.createdAt(member.getCreatedAt())
+				.modifiedAt(member.getModifiedAt())
+				.build();
+
+		return MemberTokenResponseDto.builder()
+				.memberInfo(memberResponseDto)
+				.accessToken(JwtUtil.createAccessToken(member.getMemberName()))
+				.refreshToken(refreshToken)
+				.build();
 	}
 
 
@@ -190,6 +260,6 @@ public class MemberService {
 
 		String memberName = JwtUtil.getMemberName(token);
 		return memberRepository.findByMemberName(memberName)
-				.orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND_MEMBER, "해당 맴버를 찾을 수 없습니다."));
+				.orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND_MEMBER, ErrorCode.NOT_FOUND_MEMBER.getMessage()));
 	}
 }
