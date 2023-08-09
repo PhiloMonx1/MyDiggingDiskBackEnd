@@ -214,10 +214,14 @@ public class MemberService {
 		return true;
 	}
 
+	/**
+	 * 토큰 재발급
+	 */
 	public MemberTokenResponseDto reissueToken(String refreshToken) {
 		Long memberId = JwtUtil.verifyRefreshToken(refreshToken);
-		tokenRepository.findById(memberId)
+		TokenEntity token = tokenRepository.findById(memberId)
 				.orElseThrow(()-> new AppException(ErrorCode.BLACKLIST_TOKEN, ErrorCode.BLACKLIST_TOKEN.getMessage()));
+		if(!token.getToken().equals(refreshToken)) throw new AppException(ErrorCode.BLACKLIST_TOKEN, ErrorCode.BLACKLIST_TOKEN.getMessage());
 		MemberEntity member = memberRepository.findById(memberId)
 				.orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND_MEMBER, ErrorCode.NOT_FOUND_MEMBER.getMessage()));
 
