@@ -13,6 +13,7 @@ public enum ErrorCode {
 	EXPIRED_TOKEN(HttpStatus.UNAUTHORIZED, "만료시간이 지난 토큰입니다."),
 	NOT_DECODE_TOKEN(HttpStatus.UNAUTHORIZED, "토큰을 decode 할 수 없습니다."),
 	WRONG_TYPE_TOKEN(HttpStatus.UNAUTHORIZED, "알아볼 수 없는 토큰입니다."),
+	BLACKLIST_TOKEN(HttpStatus.UNAUTHORIZED, "사용할 수 없는 리프레시 토큰입니다."),
 	/**
 	 *MemberService 관련 에러코드
 	 */

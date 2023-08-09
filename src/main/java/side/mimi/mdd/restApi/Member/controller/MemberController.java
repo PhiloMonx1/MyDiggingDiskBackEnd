@@ -80,4 +80,10 @@ public class MemberController {
 	public ResponseEntity<Boolean> removeMember(@RequestHeader(name="Authorization") String token){
 		return ResponseEntity.ok().body(memberService.removeMember(token));
 	}
+
+	@GetMapping("/reissue")
+	public ResponseEntity<MemberTokenResponseDto> reissueToken(@RequestBody String refreshToken){
+		return ResponseEntity.ok().body(memberService.reissueToken(refreshToken));
+	}
+
 }

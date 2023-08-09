@@ -214,6 +214,30 @@ public class MemberService {
 		return true;
 	}
 
+	public MemberTokenResponseDto reissueToken(String refreshToken) {
+		Long memberId = JwtUtil.verifyRefreshToken(refreshToken);
+		tokenRepository.findById(memberId)
+				.orElseThrow(()-> new AppException(ErrorCode.BLACKLIST_TOKEN, ErrorCode.BLACKLIST_TOKEN.getMessage()));
+		MemberEntity member = memberRepository.findById(memberId)
+				.orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND_MEMBER, ErrorCode.NOT_FOUND_MEMBER.getMessage()));
+
+		MemberResponseDto memberResponseDto = MemberResponseDto.builder()
+				.memberId(member.getMemberId())
+				.memberName(member.getMemberName())
+				.nickname(member.getNickname())
+				.introduce(member.getIntroduce())
+				.isMe(true)
+				.createdAt(member.getCreatedAt())
+				.modifiedAt(member.getModifiedAt())
+				.build();
+
+		return MemberTokenResponseDto.builder()
+				.memberInfo(memberResponseDto)
+				.accessToken(JwtUtil.createAccessToken(member.getMemberName()))
+				.refreshToken(refreshToken)
+				.build();
+	}
+
 
 	/**
 	 * 서비스 로직 함수 모음
