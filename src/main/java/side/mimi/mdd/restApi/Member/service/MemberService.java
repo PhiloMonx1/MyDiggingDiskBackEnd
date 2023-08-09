@@ -125,6 +125,8 @@ public class MemberService {
 				.nickname(member.getNickname())
 				.interest(member.getInterest())
 				.introduce(member.getIntroduce())
+				.visitCount(member.getVisitCount())
+				.likeCount(0)
 				.isMe(true)
 				.createdAt(member.getCreatedAt())
 				.modifiedAt(member.getModifiedAt())
@@ -171,12 +173,17 @@ public class MemberService {
 
 		loginLogRepository.save(loginLog);
 
+		//TODO : 맴버가 가진 모든 디스크의 like 수를 더한 값
+		Integer likeCnt = 0;
+
 		MemberResponseDto memberResponseDto = MemberResponseDto.builder()
 				.memberId(selectedMember.getMemberId())
 				.memberName(selectedMember.getMemberName())
 				.nickname(selectedMember.getNickname())
 				.interest(selectedMember.getInterest())
 				.introduce(selectedMember.getIntroduce())
+				.visitCount(selectedMember.getVisitCount())
+				.likeCount(likeCnt)
 				.isMe(true)
 				.createdAt(selectedMember.getCreatedAt())
 				.modifiedAt(selectedMember.getModifiedAt())
@@ -233,12 +240,17 @@ public class MemberService {
 		MemberEntity member = memberRepository.findById(memberId)
 				.orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND_MEMBER, ErrorCode.NOT_FOUND_MEMBER.getMessage()));
 
+		//TODO : 맴버가 가진 모든 디스크의 like 수를 더한 값
+		Integer likeCnt = 0;
+
 		MemberResponseDto memberResponseDto = MemberResponseDto.builder()
 				.memberId(member.getMemberId())
 				.memberName(member.getMemberName())
 				.nickname(member.getNickname())
 				.interest(member.getInterest())
 				.introduce(member.getIntroduce())
+				.visitCount(member.getVisitCount())
+				.likeCount(likeCnt)
 				.isMe(true)
 				.createdAt(member.getCreatedAt())
 				.modifiedAt(member.getModifiedAt())

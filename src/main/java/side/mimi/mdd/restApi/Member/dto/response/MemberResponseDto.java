@@ -17,7 +17,8 @@ public class MemberResponseDto {
 	private String introduce;
 	private Boolean isMe;
 	//TODO: Member 소유의 disk[] 정보
-	//TODO: Member 좋아요 수.
+	private Integer visitCount;
+	private Integer likeCount;
 	private LocalDateTime createdAt;
 	private LocalDateTime modifiedAt;
 }
