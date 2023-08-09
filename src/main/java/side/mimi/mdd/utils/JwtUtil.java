@@ -3,6 +3,7 @@ package side.mimi.mdd.utils;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTDecodeException;
+import com.auth0.jwt.exceptions.SignatureVerificationException;
 import com.auth0.jwt.exceptions.TokenExpiredException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import org.springframework.beans.factory.annotation.Value;
@@ -69,6 +70,8 @@ public class JwtUtil {
 		}catch (TokenExpiredException e){
 			throw new AppException(ErrorCode.EXPIRED_TOKEN, ErrorCode.EXPIRED_TOKEN.getMessage());
 		}catch (JWTDecodeException e){
+			throw new AppException(ErrorCode.NOT_DECODE_TOKEN, ErrorCode.NOT_DECODE_TOKEN.getMessage());
+		}catch (SignatureVerificationException e){
 			throw new AppException(ErrorCode.WRONG_TYPE_TOKEN, ErrorCode.WRONG_TYPE_TOKEN.getMessage());
 		}
 	}
