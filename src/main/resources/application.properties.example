@@ -15,3 +15,5 @@ aws.access-key=<YOUR_ACCESS_KEY>
 aws.secret-key=<YOUR_SECRET_KEY>
 aws.region=ap-northeast-2
 aws.s3.bucket=<YOUR_BUCKET_NAME>
+spring.servlet.multipart.max-file-size=1024KB
+spring.servlet.multipart.max-request-size=1024KB
