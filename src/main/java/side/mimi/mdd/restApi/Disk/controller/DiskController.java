@@ -7,7 +7,6 @@ import side.mimi.mdd.restApi.Disk.dto.request.DiskModifyRequestDto;
 import side.mimi.mdd.restApi.Disk.dto.request.DiskPostRequestDto;
 import side.mimi.mdd.restApi.Disk.dto.response.DiskResponseDto;
 import side.mimi.mdd.restApi.Disk.service.DiskService;
-import side.mimi.mdd.restApi.Member.dto.request.MemberModifyRequestDto;
 
 import java.util.List;
 
@@ -33,12 +32,17 @@ public class DiskController {
 	}
 
 	@PatchMapping("/{diskId}")
-	public ResponseEntity<Long> modifyDisk(@PathVariable Long diskId, @RequestBody DiskModifyRequestDto dto, @RequestHeader(name="Authorization") String token){
+	public ResponseEntity<DiskResponseDto> modifyDisk(@PathVariable Long diskId, @RequestBody DiskModifyRequestDto dto, @RequestHeader(name="Authorization") String token){
 		return ResponseEntity.ok().body(diskService.modifyDisk(diskId, dto, token));
 	}
 
 	@DeleteMapping("/{diskId}")
 	public ResponseEntity<Boolean> deleteDisk(@PathVariable Long diskId, @RequestHeader(name="Authorization") String token){
 		return ResponseEntity.ok().body(diskService.deleteDisk(diskId, token));
+	}
+
+	@PostMapping("like/{diskId}")
+	public ResponseEntity<Integer> likedDisk(@PathVariable Long diskId){
+		return ResponseEntity.ok().body(diskService.likedDisk(diskId));
 	}
 }

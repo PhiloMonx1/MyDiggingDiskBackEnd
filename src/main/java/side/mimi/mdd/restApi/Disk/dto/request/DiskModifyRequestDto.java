@@ -10,4 +10,6 @@ public class DiskModifyRequestDto {
 	private String content;
 	private DiskColorEnum diskColor;
 	private Boolean isPrivate;
+	private Boolean isFavorite;
+
 }

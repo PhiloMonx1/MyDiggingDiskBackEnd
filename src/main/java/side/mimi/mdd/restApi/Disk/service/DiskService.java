@@ -31,6 +31,10 @@ public class DiskService {
 						.content(disk.getContent())
 						.diskColor(disk.getDiskColor())
 						.isPrivate(disk.isPrivate())
+						.isFavorite(disk.isFavorite())
+						.likeCount(disk.getLikeCount())
+						.diskOwnerId(disk.getMember().getMemberId())
+						.diskOwnerNickname(disk.getMember().getNickname())
 						.isMine(true)
 						.createdAt(disk.getCreatedAt())
 						.modifiedAt(disk.getModifiedAt())
@@ -50,6 +54,10 @@ public class DiskService {
 				.content(disk.getContent())
 				.diskColor(disk.getDiskColor())
 				.isPrivate(disk.isPrivate())
+				.isFavorite(disk.isFavorite())
+				.likeCount(disk.getLikeCount())
+				.diskOwnerId(disk.getMember().getMemberId())
+				.diskOwnerNickname(disk.getMember().getNickname())
 				.isMine(member != null && disk.getMember().getMemberId() == member.getMemberId())
 				.createdAt(disk.getCreatedAt())
 				.modifiedAt(disk.getModifiedAt())
@@ -62,17 +70,19 @@ public class DiskService {
 		if(dto.getDiskName().length() > 30) throw new AppException(ErrorCode.OVER_LONG_DISK_NAME, ErrorCode.OVER_LONG_DISK_NAME.getMessage());
 		if(dto.getContent().length() > 300) throw new AppException(ErrorCode.OVER_LONG_CONTENT, ErrorCode.OVER_LONG_CONTENT.getMessage());
 
-		//isPrivate Default값 부여
+		//isPrivate, isFavorite Default값 부여
 		Boolean isPrivate = false;
-		if(dto.getIsPrivate() != null){
-			isPrivate = dto.getIsPrivate();
-		}
+		Boolean isFavorite = false;
+		if(dto.getIsPrivate() != null) isPrivate = dto.getIsPrivate();
+		if(dto.getIsFavorite() != null) isFavorite = dto.getIsFavorite();
 
 		DiskEntity disk = DiskEntity.builder()
 				.diskName(dto.getDiskName())
 				.content(dto.getContent())
 				.diskColor(dto.getDiskColor())
 				.isPrivate(isPrivate)
+				.isFavorite(isFavorite)
+				.likeCount(0)
 				.member(member)
 				.build();
 
@@ -84,13 +94,17 @@ public class DiskService {
 				.content(disk.getContent())
 				.diskColor(disk.getDiskColor())
 				.isPrivate(disk.isPrivate())
+				.isFavorite(disk.isFavorite())
+				.likeCount(disk.getLikeCount())
+				.diskOwnerId(disk.getMember().getMemberId())
+				.diskOwnerNickname(disk.getMember().getNickname())
 				.isMine(true)
 				.createdAt(disk.getCreatedAt())
 				.modifiedAt(disk.getModifiedAt())
 				.build();
 	}
 
-	public Long modifyDisk(Long diskId, DiskModifyRequestDto dto, String token) {
+	public DiskResponseDto modifyDisk(Long diskId, DiskModifyRequestDto dto, String token) {
 		MemberEntity member = memberService.getMemberByJwt(token);
 
 		DiskEntity myDisk = diskRepository.findById(diskId)
@@ -103,7 +117,20 @@ public class DiskService {
 		myDisk.modifyDisk(dto);
 		diskRepository.save(myDisk);
 
-		return myDisk.getDiskId();
+		return DiskResponseDto.builder()
+				.diskId(myDisk.getDiskId())
+				.diskName(myDisk.getDiskName())
+				.content(myDisk.getContent())
+				.diskColor(myDisk.getDiskColor())
+				.isPrivate(myDisk.isPrivate())
+				.isFavorite(myDisk.isFavorite())
+				.likeCount(myDisk.getLikeCount())
+				.diskOwnerId(myDisk.getMember().getMemberId())
+				.diskOwnerNickname(myDisk.getMember().getNickname())
+				.isMine(true)
+				.createdAt(myDisk.getCreatedAt())
+				.modifiedAt(myDisk.getModifiedAt())
+				.build();
 	}
 
 	public Boolean deleteDisk(Long diskId, String token) {
@@ -116,5 +143,15 @@ public class DiskService {
 
 		diskRepository.delete(myDisk);
 		return true;
+	}
+
+	public Integer likedDisk(Long diskId) {
+		DiskEntity disk = diskRepository.findById(diskId)
+				.orElseThrow(() ->new AppException(ErrorCode.NOT_FOUND_DISK, ErrorCode.NOT_FOUND_DISK.getMessage()));
+
+		disk.likedDisk();
+
+		diskRepository.save(disk);
+		return disk.getLikeCount();
 	}
 }
