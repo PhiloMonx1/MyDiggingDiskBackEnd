@@ -36,8 +36,12 @@ public class DiskEntity extends BaseEntity {
 	@Column(name = "IS_PRIVATE")
 	private boolean isPrivate;
 
-	//TODO : isFavorite 추가
-	//TODO : likeCount 추가
+	@Column(name = "IS_FAVORITE")
+	private boolean isFavorite;
+
+	@Column(name = "LIKE_COUNT")
+	private Integer likeCount;
+
 	//TODO : diskImgIdList 추가
 
 	@ManyToOne(fetch = FetchType.LAZY)
