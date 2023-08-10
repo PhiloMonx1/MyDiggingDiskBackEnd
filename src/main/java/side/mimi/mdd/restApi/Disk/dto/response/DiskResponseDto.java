@@ -19,6 +19,8 @@ public class DiskResponseDto {
 	private Boolean isPrivate;
 	private Boolean isFavorite;
 	private Integer likeCount;
+	private Long diskOwnerId;
+	private String diskOwnerNickname;
 	private Boolean isMine;
 	//TODO: 이미지
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
