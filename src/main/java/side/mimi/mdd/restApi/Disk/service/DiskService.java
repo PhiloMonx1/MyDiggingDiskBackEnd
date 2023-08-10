@@ -137,13 +137,13 @@ public class DiskService {
 		return true;
 	}
 
-	public Boolean likedDisk(Long diskId) {
+	public Integer likedDisk(Long diskId) {
 		DiskEntity disk = diskRepository.findById(diskId)
 				.orElseThrow(() ->new AppException(ErrorCode.NOT_FOUND_DISK, ErrorCode.NOT_FOUND_DISK.getMessage()));
 
 		disk.likedDisk();
 
 		diskRepository.save(disk);
-		return true;
+		return disk.getLikeCount();
 	}
 }

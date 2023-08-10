@@ -7,7 +7,6 @@ import side.mimi.mdd.restApi.Disk.dto.request.DiskModifyRequestDto;
 import side.mimi.mdd.restApi.Disk.dto.request.DiskPostRequestDto;
 import side.mimi.mdd.restApi.Disk.dto.response.DiskResponseDto;
 import side.mimi.mdd.restApi.Disk.service.DiskService;
-import side.mimi.mdd.restApi.Member.dto.request.MemberModifyRequestDto;
 
 import java.util.List;
 
@@ -42,8 +41,8 @@ public class DiskController {
 		return ResponseEntity.ok().body(diskService.deleteDisk(diskId, token));
 	}
 
-	@PostMapping("/{diskId}")
-	public ResponseEntity<Boolean> likedDisk(@PathVariable Long diskId){
+	@PostMapping("like/{diskId}")
+	public ResponseEntity<Integer> likedDisk(@PathVariable Long diskId){
 		return ResponseEntity.ok().body(diskService.likedDisk(diskId));
 	}
 }
