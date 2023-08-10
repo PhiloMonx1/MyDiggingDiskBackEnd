@@ -73,6 +73,8 @@ public class DiskService {
 				.content(dto.getContent())
 				.diskColor(dto.getDiskColor())
 				.isPrivate(isPrivate)
+				.isFavorite(dto.getIsFavorite())
+				.likeCount(0)
 				.member(member)
 				.build();
 
@@ -84,6 +86,8 @@ public class DiskService {
 				.content(disk.getContent())
 				.diskColor(disk.getDiskColor())
 				.isPrivate(disk.isPrivate())
+				.isFavorite(disk.isFavorite())
+				.likeCount(disk.getLikeCount())
 				.isMine(true)
 				.createdAt(disk.getCreatedAt())
 				.modifiedAt(disk.getModifiedAt())
