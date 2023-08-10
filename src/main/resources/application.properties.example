@@ -11,3 +11,7 @@ spring.jpa.properties.hibernate.show_sql=true
 spring.jpa.hibernate.ddl-auto=create-drop
 jwt.secret=secretKey
 refreshKey.secret=refreshKey
+aws.access-key=<YOUR_ACCESS_KEY>
+aws.secret-key=<YOUR_SECRET_KEY>
+aws.region=ap-northeast-2
+aws.s3.bucket=<YOUR_BUCKET_NAME>
