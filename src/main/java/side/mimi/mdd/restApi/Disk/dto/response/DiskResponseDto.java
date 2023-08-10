@@ -17,6 +17,8 @@ public class DiskResponseDto {
 	private String content;
 	private DiskColorEnum diskColor;
 	private Boolean isPrivate;
+	private Boolean isFavorite;
+	private Integer likeCount;
 	private Boolean isMine;
 	//TODO: 이미지
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
