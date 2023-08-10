@@ -56,4 +56,8 @@ public class DiskEntity extends BaseEntity {
 		if(dto.getIsPrivate() != null) isPrivate = dto.getIsPrivate();
 		if(dto.getIsFavorite() != null) isFavorite = dto.getIsFavorite();
 	}
+
+	public void likedDisk(){
+		likeCount ++;
+	}
 }

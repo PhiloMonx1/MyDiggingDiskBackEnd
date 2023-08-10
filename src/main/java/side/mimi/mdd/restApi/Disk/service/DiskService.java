@@ -132,4 +132,14 @@ public class DiskService {
 		diskRepository.delete(myDisk);
 		return true;
 	}
+
+	public Boolean likedDisk(Long diskId) {
+		DiskEntity disk = diskRepository.findById(diskId)
+				.orElseThrow(() ->new AppException(ErrorCode.NOT_FOUND_DISK, ErrorCode.NOT_FOUND_DISK.getMessage()));
+
+		disk.likedDisk();
+
+		diskRepository.save(disk);
+		return true;
+	}
 }
