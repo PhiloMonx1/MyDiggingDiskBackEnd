@@ -33,7 +33,7 @@ public class DiskController {
 	}
 
 	@PatchMapping("/{diskId}")
-	public ResponseEntity<Long> modifyDisk(@PathVariable Long diskId, @RequestBody DiskModifyRequestDto dto, @RequestHeader(name="Authorization") String token){
+	public ResponseEntity<DiskResponseDto> modifyDisk(@PathVariable Long diskId, @RequestBody DiskModifyRequestDto dto, @RequestHeader(name="Authorization") String token){
 		return ResponseEntity.ok().body(diskService.modifyDisk(diskId, dto, token));
 	}
 

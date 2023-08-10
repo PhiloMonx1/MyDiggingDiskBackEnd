@@ -94,7 +94,7 @@ public class DiskService {
 				.build();
 	}
 
-	public Long modifyDisk(Long diskId, DiskModifyRequestDto dto, String token) {
+	public DiskResponseDto modifyDisk(Long diskId, DiskModifyRequestDto dto, String token) {
 		MemberEntity member = memberService.getMemberByJwt(token);
 
 		DiskEntity myDisk = diskRepository.findById(diskId)
@@ -107,7 +107,18 @@ public class DiskService {
 		myDisk.modifyDisk(dto);
 		diskRepository.save(myDisk);
 
-		return myDisk.getDiskId();
+		return DiskResponseDto.builder()
+				.diskId(myDisk.getDiskId())
+				.diskName(myDisk.getDiskName())
+				.content(myDisk.getContent())
+				.diskColor(myDisk.getDiskColor())
+				.isPrivate(myDisk.isPrivate())
+				.isFavorite(myDisk.isFavorite())
+				.likeCount(myDisk.getLikeCount())
+				.isMine(true)
+				.createdAt(myDisk.getCreatedAt())
+				.modifiedAt(myDisk.getModifiedAt())
+				.build();
 	}
 
 	public Boolean deleteDisk(Long diskId, String token) {
