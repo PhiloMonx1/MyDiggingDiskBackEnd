@@ -62,18 +62,18 @@ public class DiskService {
 		if(dto.getDiskName().length() > 30) throw new AppException(ErrorCode.OVER_LONG_DISK_NAME, ErrorCode.OVER_LONG_DISK_NAME.getMessage());
 		if(dto.getContent().length() > 300) throw new AppException(ErrorCode.OVER_LONG_CONTENT, ErrorCode.OVER_LONG_CONTENT.getMessage());
 
-		//isPrivate Default값 부여
+		//isPrivate, isFavorite Default값 부여
 		Boolean isPrivate = false;
-		if(dto.getIsPrivate() != null){
-			isPrivate = dto.getIsPrivate();
-		}
+		Boolean isFavorite = false;
+		if(dto.getIsPrivate() != null) isPrivate = dto.getIsPrivate();
+		if(dto.getIsFavorite() != null) isFavorite = dto.getIsFavorite();
 
 		DiskEntity disk = DiskEntity.builder()
 				.diskName(dto.getDiskName())
 				.content(dto.getContent())
 				.diskColor(dto.getDiskColor())
 				.isPrivate(isPrivate)
-				.isFavorite(dto.getIsFavorite())
+				.isFavorite(isFavorite)
 				.likeCount(0)
 				.member(member)
 				.build();
