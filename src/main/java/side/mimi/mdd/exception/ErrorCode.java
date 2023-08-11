@@ -26,6 +26,7 @@ public enum ErrorCode {
 	WRONG_MEMBER_NAME_VALID(HttpStatus.BAD_REQUEST, "MemberName은 20자 이하의 영어와 숫자로만 이루어져 있어야 합니다."),
 	WRONG_PASSWORD_VALID(HttpStatus.BAD_REQUEST, "password는 6자리 숫자로만 이루어져 있어야 합니다."),
 	WRONG_NICKNAME_VALID(HttpStatus.BAD_REQUEST, "nickname은 10자를 초과할 수 없습니다."),
+	WRONG_INTEREST_VALID(HttpStatus.BAD_REQUEST, "interest는 10자를 초과할 수 없습니다."),
 	WRONG_INTRODUCE_VALID(HttpStatus.BAD_REQUEST, "introduce는 30자를 초과할 수 없습니다."),
 	//로그인 (Login)
 	MEMBER_NAME_NOT_FOUND(HttpStatus.NOT_FOUND, "찾을 수 없는 memberName 입니다."),
