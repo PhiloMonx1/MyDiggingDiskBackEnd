@@ -47,7 +47,6 @@ public class MemberService {
 	 * 마이페이지
 	 */
 	public MemberResponseDto getMyPage(String token) {
-
 		MemberEntity member = getMemberByJwt(token);
 
 		Integer likeCnt = getTotalLikesByMemberId(member.getMemberId());
@@ -115,7 +114,9 @@ public class MemberService {
 	 * 회원가입
 	 */
 	public MemberTokenResponseDto join(MemberJoinRequestDto dto){
-
+		//TODO : 디스크 생성까지 같이 받을지에 대한 논의
+		//TODO : 최소 글자 수 및 빈값에 대한 예외처리
+		//TODO : 토큰 헤더에 담기
 		if(dto.getMemberName().isEmpty() || dto.getPassword().isEmpty()) throw new AppException(ErrorCode.EMPTY_JOIN_REQUEST, ErrorCode.EMPTY_JOIN_REQUEST.getMessage());
 		String memberName = dto.getMemberName().toLowerCase();
 		String nickname = generator.getRandomNickname();

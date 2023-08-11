@@ -23,6 +23,7 @@ public class DiskService {
 	private final MemberService memberService;
 
 	public List<DiskResponseDto> getMyDisks(String token) {
+		//TODO : 오버패칭 유지할 것인지에 대한 판단 필요
 		MemberEntity member = memberService.getMemberByJwt(token);
 		List<DiskEntity> myDisks = diskRepository.findAllByMemberMemberId(member.getMemberId());
 
