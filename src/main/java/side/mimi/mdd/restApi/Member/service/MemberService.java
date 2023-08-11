@@ -75,7 +75,7 @@ public class MemberService {
 		Integer likeCnt = getTotalLikesByMemberId(member.getMemberId());
 
 		//조회수 증가
-		if(memberByJwt != null && !member.getMemberName().equals(memberByJwt.getMemberName())) viewCntIncrease(member);
+		if(memberByJwt == null || (memberByJwt != null && !member.getMemberName().equals(memberByJwt.getMemberName()))) viewCntIncrease(member);
 
 		return MemberResponseDto.builder()
 				.memberId(member.getMemberId())
