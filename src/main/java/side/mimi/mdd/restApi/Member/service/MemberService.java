@@ -223,7 +223,7 @@ public class MemberService {
 	public Long modifyMemberInfo(MemberModifyRequestDto dto, String token) {
 		if(dto.getNickname() != null && dto.getNickname().length() > 10) throw new AppException(ErrorCode.WRONG_NICKNAME_VALID, ErrorCode.WRONG_NICKNAME_VALID.getMessage());
 		if(dto.getNickname() != null && dto.getIntroduce().length() > 30) throw new AppException(ErrorCode.WRONG_INTRODUCE_VALID, ErrorCode.WRONG_INTRODUCE_VALID.getMessage());
-
+		//TODO : interest 글자 제한 예외처리
 		MemberEntity member = getMemberByJwt(token);
 
 		if(dto.getNickname() != null && !member.getNickname().equals(dto.getNickname())){

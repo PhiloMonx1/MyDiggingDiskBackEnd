@@ -7,4 +7,6 @@ import java.util.List;
 
 public interface DiskRepository extends JpaRepository<DiskEntity, Long> {
 	List<DiskEntity> findAllByMemberMemberId(Long memberId);
+	List<DiskEntity> findAllByMemberMemberIdAndIsBookmarkNotNullOrderByIsBookmarkDesc(Long memberId);
+
 }
