@@ -221,12 +221,12 @@ public class MemberService {
 	 * 회원 정보 수정
 	 */
 	public Long modifyMemberInfo(MemberModifyRequestDto dto, String token) {
-		if(dto.getNickname().length() > 10) throw new AppException(ErrorCode.WRONG_NICKNAME_VALID, ErrorCode.WRONG_NICKNAME_VALID.getMessage());
-		if(dto.getIntroduce().length() > 30) throw new AppException(ErrorCode.WRONG_INTRODUCE_VALID, ErrorCode.WRONG_INTRODUCE_VALID.getMessage());
-
+		if(dto.getNickname() != null && dto.getNickname().length() > 10) throw new AppException(ErrorCode.WRONG_NICKNAME_VALID, ErrorCode.WRONG_NICKNAME_VALID.getMessage());
+		if(dto.getNickname() != null && dto.getIntroduce().length() > 30) throw new AppException(ErrorCode.WRONG_INTRODUCE_VALID, ErrorCode.WRONG_INTRODUCE_VALID.getMessage());
+		//TODO : interest 글자 제한 예외처리
 		MemberEntity member = getMemberByJwt(token);
 
-		if(!member.getNickname().equals(dto.getNickname())){
+		if(dto.getNickname() != null && !member.getNickname().equals(dto.getNickname())){
 			memberRepository.findByNickname(dto.getNickname())
 					.ifPresent(memberEntity -> {throw new AppException(ErrorCode.MEMBER_NICKNAME_DUPLICATED, ErrorCode.MEMBER_NICKNAME_DUPLICATED.getMessage());});
 		}

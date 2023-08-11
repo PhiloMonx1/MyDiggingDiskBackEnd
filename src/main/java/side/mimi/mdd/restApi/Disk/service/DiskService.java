@@ -12,6 +12,7 @@ import side.mimi.mdd.restApi.Disk.repository.DiskRepository;
 import side.mimi.mdd.restApi.Member.model.MemberEntity;
 import side.mimi.mdd.restApi.Member.service.MemberService;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -31,7 +32,7 @@ public class DiskService {
 						.content(disk.getContent())
 						.diskColor(disk.getDiskColor())
 						.isPrivate(disk.isPrivate())
-						.isFavorite(disk.isFavorite())
+						.isBookmark(disk.getIsBookmark() != null)
 						.likeCount(disk.getLikeCount())
 						.diskOwnerId(disk.getMember().getMemberId())
 						.diskOwnerNickname(disk.getMember().getNickname())
@@ -54,7 +55,7 @@ public class DiskService {
 				.content(disk.getContent())
 				.diskColor(disk.getDiskColor())
 				.isPrivate(disk.isPrivate())
-				.isFavorite(disk.isFavorite())
+				.isBookmark(disk.getIsBookmark() != null)
 				.likeCount(disk.getLikeCount())
 				.diskOwnerId(disk.getMember().getMemberId())
 				.diskOwnerNickname(disk.getMember().getNickname())
@@ -66,22 +67,25 @@ public class DiskService {
 
 	public DiskResponseDto postDisk(DiskPostRequestDto dto, String token) {
 		MemberEntity member = memberService.getMemberByJwt(token);
+		List<DiskEntity> bookmarkedDiskList = diskRepository.findAllByMemberMemberIdAndIsBookmarkNotNullOrderByIsBookmarkDesc(member.getMemberId());
 
 		if(dto.getDiskName().length() > 30) throw new AppException(ErrorCode.OVER_LONG_DISK_NAME, ErrorCode.OVER_LONG_DISK_NAME.getMessage());
 		if(dto.getContent().length() > 300) throw new AppException(ErrorCode.OVER_LONG_CONTENT, ErrorCode.OVER_LONG_CONTENT.getMessage());
+		if(dto.getIsBookmark() != null && dto.getIsBookmark() && bookmarkedDiskList.size() >= 3)
+			throw new AppException(ErrorCode.BOOKMARK_DISK_LIMIT, ErrorCode.BOOKMARK_DISK_LIMIT.getMessage());
 
-		//isPrivate, isFavorite Default값 부여
+		//isPrivate, isBookmark Default값 부여
 		Boolean isPrivate = false;
-		Boolean isFavorite = false;
+		LocalDateTime isBookmark = null;
 		if(dto.getIsPrivate() != null) isPrivate = dto.getIsPrivate();
-		if(dto.getIsFavorite() != null) isFavorite = dto.getIsFavorite();
+		if(dto.getIsBookmark() != null && dto.getIsBookmark()) isBookmark = LocalDateTime.now();
 
 		DiskEntity disk = DiskEntity.builder()
 				.diskName(dto.getDiskName())
 				.content(dto.getContent())
 				.diskColor(dto.getDiskColor())
 				.isPrivate(isPrivate)
-				.isFavorite(isFavorite)
+				.isBookmark(isBookmark)
 				.likeCount(0)
 				.member(member)
 				.build();
@@ -94,7 +98,7 @@ public class DiskService {
 				.content(disk.getContent())
 				.diskColor(disk.getDiskColor())
 				.isPrivate(disk.isPrivate())
-				.isFavorite(disk.isFavorite())
+				.isBookmark(disk.getIsBookmark() != null)
 				.likeCount(disk.getLikeCount())
 				.diskOwnerId(disk.getMember().getMemberId())
 				.diskOwnerNickname(disk.getMember().getNickname())
@@ -106,6 +110,7 @@ public class DiskService {
 
 	public DiskResponseDto modifyDisk(Long diskId, DiskModifyRequestDto dto, String token) {
 		MemberEntity member = memberService.getMemberByJwt(token);
+		List<DiskEntity> bookmarkedDiskList = diskRepository.findAllByMemberMemberIdAndIsBookmarkNotNullOrderByIsBookmarkDesc(member.getMemberId());
 
 		DiskEntity myDisk = diskRepository.findById(diskId)
 						.orElseThrow(() ->new AppException(ErrorCode.NOT_FOUND_DISK, ErrorCode.NOT_FOUND_DISK.getMessage()));
@@ -113,6 +118,9 @@ public class DiskService {
 		if(myDisk.getMember().getMemberId() != member.getMemberId()) throw new AppException(ErrorCode.NOT_DISK_OWNER, ErrorCode.NOT_DISK_OWNER.getMessage());
 		if(dto.getDiskName() != null && dto.getDiskName().length() > 30) throw new AppException(ErrorCode.OVER_LONG_DISK_NAME, ErrorCode.OVER_LONG_DISK_NAME.getMessage());
 		if(dto.getContent() != null && dto.getContent().length() > 300) throw new AppException(ErrorCode.OVER_LONG_CONTENT, ErrorCode.OVER_LONG_CONTENT.getMessage());
+
+		if (bookmarkedDiskList.size() >= 3 && bookmarkedDiskList.stream().noneMatch(bookmarkedDisk -> bookmarkedDisk.getDiskId().equals(myDisk.getDiskId())))
+			throw new AppException(ErrorCode.BOOKMARK_DISK_LIMIT, ErrorCode.BOOKMARK_DISK_LIMIT.getMessage());
 
 		myDisk.modifyDisk(dto);
 		diskRepository.save(myDisk);
@@ -123,7 +131,7 @@ public class DiskService {
 				.content(myDisk.getContent())
 				.diskColor(myDisk.getDiskColor())
 				.isPrivate(myDisk.isPrivate())
-				.isFavorite(myDisk.isFavorite())
+				.isBookmark(myDisk.getIsBookmark() != null)
 				.likeCount(myDisk.getLikeCount())
 				.diskOwnerId(myDisk.getMember().getMemberId())
 				.diskOwnerNickname(myDisk.getMember().getNickname())
@@ -153,5 +161,21 @@ public class DiskService {
 
 		diskRepository.save(disk);
 		return disk.getLikeCount();
+	}
+
+	public Boolean bookmarkDisk(Long diskId, String token) {
+		MemberEntity member = memberService.getMemberByJwt(token);
+
+		DiskEntity disk = diskRepository.findById(diskId)
+				.orElseThrow(() ->new AppException(ErrorCode.NOT_FOUND_DISK, ErrorCode.NOT_FOUND_DISK.getMessage()));
+		if(disk.getMember().getMemberId() != member.getMemberId()) throw new AppException(ErrorCode.NOT_DISK_OWNER, ErrorCode.NOT_DISK_OWNER.getMessage());
+
+		List<DiskEntity> bookmarkedDiskList = diskRepository.findAllByMemberMemberIdAndIsBookmarkNotNullOrderByIsBookmarkDesc(member.getMemberId());
+		if (bookmarkedDiskList.size() >= 3 && bookmarkedDiskList.stream().noneMatch(bookmarkedDisk -> bookmarkedDisk.getDiskId().equals(disk.getDiskId())))
+			throw new AppException(ErrorCode.BOOKMARK_DISK_LIMIT, ErrorCode.BOOKMARK_DISK_LIMIT.getMessage());
+
+			disk.bookmarkDisk();
+		diskRepository.save(disk);
+		return (disk.getIsBookmark() != null);
 	}
 }

@@ -40,7 +40,9 @@ public enum ErrorCode {
 	//조회
 	NOT_FOUND_DISK(HttpStatus.NOT_FOUND, "해당 DiskId를 가진 Disk를 찾을 수 없습니다."),
 	//수정, 삭제
-	NOT_DISK_OWNER(HttpStatus.NOT_FOUND, "Disk 소유자만 삭제 권한이 주어집니다."),
+	NOT_DISK_OWNER(HttpStatus.NOT_FOUND, "Disk 소유자만 수정 및 삭제 권한이 주어집니다."),
+	//대표 디스크 (북마크, favorite)
+	BOOKMARK_DISK_LIMIT(HttpStatus.NOT_FOUND, "대표디스크는 3개 까지 설정 가능합니다."),
 	;
 
 	private HttpStatus httpStatus;

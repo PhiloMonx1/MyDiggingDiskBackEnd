@@ -11,6 +11,6 @@ public class DiskPostRequestDto {
 	private String content;
 	private DiskColorEnum diskColor;
 	private Boolean isPrivate;
-	private Boolean isFavorite;
+	private Boolean isBookmark;
 	// TODO : 이미지
 }
