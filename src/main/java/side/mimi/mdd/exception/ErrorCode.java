@@ -44,6 +44,11 @@ public enum ErrorCode {
 	NOT_DISK_OWNER(HttpStatus.NOT_FOUND, "Disk 소유자만 수정 및 삭제 권한이 주어집니다."),
 	//대표 디스크 (북마크, favorite)
 	BOOKMARK_DISK_LIMIT(HttpStatus.NOT_FOUND, "대표디스크는 3개 까지 설정 가능합니다."),
+	/**
+	 * 이미지 유틸 관련 에러코드
+	 */
+	//이미지 형식 오류
+	NOT_SUPPORTED_FILE_TYPE(HttpStatus.NOT_FOUND, "MultipartFile은 현재 PNG, JPG, JPGE 타입만 지원하고 있습니다."),
 	;
 
 	private HttpStatus httpStatus;
