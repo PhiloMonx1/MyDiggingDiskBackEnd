@@ -8,6 +8,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import side.mimi.mdd.exception.AppException;
 import side.mimi.mdd.exception.ErrorCode;
+import side.mimi.mdd.restApi.Disk.repository.DiskRepository;
 import side.mimi.mdd.restApi.Member.dto.request.MemberJoinRequestDto;
 import side.mimi.mdd.restApi.Member.dto.request.MemberLoginRequestDto;
 import side.mimi.mdd.restApi.Member.dto.request.MemberModifyRequestDto;
@@ -32,6 +33,7 @@ public class MemberService {
 
 	private final MemberRepository memberRepository;
 	private final LoginLogRepository loginLogRepository;
+	private final DiskRepository diskRepository;
 	private final TokenRepository tokenRepository;
 	private final BCryptPasswordEncoder encoder;
 	private final CombineRandomNickname generator = new CombineRandomNickname();
@@ -44,8 +46,7 @@ public class MemberService {
 
 		MemberEntity member = getMemberByJwt(token);
 
-		//TODO : 맴버가 가진 모든 디스크의 like 수를 더한 값
-		Integer likeCnt = 0;
+		Integer likeCnt = getTotalLikesByMemberId(member.getMemberId());
 
 		return MemberResponseDto.builder()
 				.memberId(member.getMemberId())
@@ -71,8 +72,10 @@ public class MemberService {
 
 		MemberEntity memberByJwt = getMemberByJwt(token);
 
-		//TODO : 맴버가 가진 모든 디스크의 like 수를 더한 값
-		Integer likeCnt = 0;
+		Integer likeCnt = getTotalLikesByMemberId(member.getMemberId());
+
+		//조회수 증가
+		if(memberByJwt != null && !member.getMemberName().equals(memberByJwt.getMemberName())) viewCntIncrease(member);
 
 		return MemberResponseDto.builder()
 				.memberId(member.getMemberId())
@@ -187,8 +190,7 @@ public class MemberService {
 
 		loginLogRepository.save(loginLog);
 
-		//TODO : 맴버가 가진 모든 디스크의 like 수를 더한 값
-		Integer likeCnt = 0;
+		Integer likeCnt = getTotalLikesByMemberId(selectedMember.getMemberId());
 
 		MemberResponseDto memberResponseDto = MemberResponseDto.builder()
 				.memberId(selectedMember.getMemberId())
@@ -222,8 +224,9 @@ public class MemberService {
 	 */
 	public Long modifyMemberInfo(MemberModifyRequestDto dto, String token) {
 		if(dto.getNickname() != null && dto.getNickname().length() > 10) throw new AppException(ErrorCode.WRONG_NICKNAME_VALID, ErrorCode.WRONG_NICKNAME_VALID.getMessage());
-		if(dto.getNickname() != null && dto.getIntroduce().length() > 30) throw new AppException(ErrorCode.WRONG_INTRODUCE_VALID, ErrorCode.WRONG_INTRODUCE_VALID.getMessage());
-		//TODO : interest 글자 제한 예외처리
+		if(dto.getInterest() != null && dto.getInterest().length() > 10) throw new AppException(ErrorCode.WRONG_INTEREST_VALID, ErrorCode.WRONG_INTEREST_VALID.getMessage());
+		if(dto.getIntroduce() != null && dto.getIntroduce().length() > 30) throw new AppException(ErrorCode.WRONG_INTRODUCE_VALID, ErrorCode.WRONG_INTRODUCE_VALID.getMessage());
+
 		MemberEntity member = getMemberByJwt(token);
 
 		if(dto.getNickname() != null && !member.getNickname().equals(dto.getNickname())){
@@ -257,8 +260,7 @@ public class MemberService {
 		MemberEntity member = memberRepository.findById(memberId)
 				.orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND_MEMBER, ErrorCode.NOT_FOUND_MEMBER.getMessage()));
 
-		//TODO : 맴버가 가진 모든 디스크의 like 수를 더한 값
-		Integer likeCnt = 0;
+		Integer likeCnt = getTotalLikesByMemberId(member.getMemberId());
 
 		MemberResponseDto memberResponseDto = MemberResponseDto.builder()
 				.memberId(member.getMemberId())
@@ -285,6 +287,8 @@ public class MemberService {
 	 * 서비스 로직 함수 모음
 	 * 1. isLoginOverFailed = 로그인 자동 공격 방지 함수 (비밀번호 5회 틀릴 시 1분 동안 true)
 	 * 2. getMemberByJwt = 토큰에서 맴버 객체 뽑기
+	 * 3. viewCntIncrease = 맴버 페이지 조회 수 증가
+	 * 4. getTotalLikesByMemberId = 맴버가 가진 모든 disk 좋아요 수 리턴
 	 */
 	private boolean isLoginOverFailed(String memberName) {
 		PageRequest pageRequest = PageRequest.of(0, 5, Sort.by(Sort.Direction.DESC, "createdAt"));
@@ -303,5 +307,16 @@ public class MemberService {
 		String memberName = JwtUtil.getMemberName(token);
 		return memberRepository.findByMemberName(memberName)
 				.orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND_MEMBER, ErrorCode.NOT_FOUND_MEMBER.getMessage()));
+	}
+
+	private void viewCntIncrease(MemberEntity member){
+		member.viewCntIncrease();
+		memberRepository.save(member);
+	}
+
+	public Integer getTotalLikesByMemberId(Long memberId) {
+		Integer totalLikes = diskRepository.getTotalLikesByMemberId(memberId);
+		if (totalLikes == null) return 0;
+		return totalLikes;
 	}
 }

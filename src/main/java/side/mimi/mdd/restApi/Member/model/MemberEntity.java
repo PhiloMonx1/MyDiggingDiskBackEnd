@@ -56,4 +56,7 @@ public class MemberEntity extends BaseEntity {
 		if(dto.getInterest() != null && !dto.getInterest().isEmpty()) interest = dto.getInterest();
 		if(dto.getIntroduce() != null && !dto.getIntroduce().isEmpty()) introduce = dto.getIntroduce();
 	}
+	public void viewCntIncrease(){
+		visitCount++;
+	}
 }
