@@ -31,7 +31,7 @@ public class DiskService {
 						.content(disk.getContent())
 						.diskColor(disk.getDiskColor())
 						.isPrivate(disk.isPrivate())
-						.isFavorite(disk.isFavorite())
+						.isBookmark(disk.isBookmark())
 						.likeCount(disk.getLikeCount())
 						.diskOwnerId(disk.getMember().getMemberId())
 						.diskOwnerNickname(disk.getMember().getNickname())
@@ -54,7 +54,7 @@ public class DiskService {
 				.content(disk.getContent())
 				.diskColor(disk.getDiskColor())
 				.isPrivate(disk.isPrivate())
-				.isFavorite(disk.isFavorite())
+				.isBookmark(disk.isBookmark())
 				.likeCount(disk.getLikeCount())
 				.diskOwnerId(disk.getMember().getMemberId())
 				.diskOwnerNickname(disk.getMember().getNickname())
@@ -81,7 +81,7 @@ public class DiskService {
 				.content(dto.getContent())
 				.diskColor(dto.getDiskColor())
 				.isPrivate(isPrivate)
-				.isFavorite(isFavorite)
+				.isBookmark(isFavorite)
 				.likeCount(0)
 				.member(member)
 				.build();
@@ -94,7 +94,7 @@ public class DiskService {
 				.content(disk.getContent())
 				.diskColor(disk.getDiskColor())
 				.isPrivate(disk.isPrivate())
-				.isFavorite(disk.isFavorite())
+				.isBookmark(disk.isBookmark())
 				.likeCount(disk.getLikeCount())
 				.diskOwnerId(disk.getMember().getMemberId())
 				.diskOwnerNickname(disk.getMember().getNickname())
@@ -123,7 +123,7 @@ public class DiskService {
 				.content(myDisk.getContent())
 				.diskColor(myDisk.getDiskColor())
 				.isPrivate(myDisk.isPrivate())
-				.isFavorite(myDisk.isFavorite())
+				.isBookmark(myDisk.isBookmark())
 				.likeCount(myDisk.getLikeCount())
 				.diskOwnerId(myDisk.getMember().getMemberId())
 				.diskOwnerNickname(myDisk.getMember().getNickname())
@@ -153,5 +153,19 @@ public class DiskService {
 
 		diskRepository.save(disk);
 		return disk.getLikeCount();
+	}
+
+	public Boolean bookmarkDisk(Long diskId, String token) {
+		MemberEntity member = memberService.getMemberByJwt(token);
+
+		DiskEntity disk = diskRepository.findById(diskId)
+				.orElseThrow(() ->new AppException(ErrorCode.NOT_FOUND_DISK, ErrorCode.NOT_FOUND_DISK.getMessage()));
+
+		if(disk.getMember().getMemberId() != member.getMemberId()) throw new AppException(ErrorCode.NOT_DISK_OWNER, ErrorCode.NOT_DISK_OWNER.getMessage());
+
+
+		disk.bookmarkDisk();
+		diskRepository.save(disk);
+		return disk.isBookmark();
 	}
 }

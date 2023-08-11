@@ -36,8 +36,8 @@ public class DiskEntity extends BaseEntity {
 	@Column(name = "IS_PRIVATE")
 	private boolean isPrivate;
 
-	@Column(name = "IS_FAVORITE")
-	private boolean isFavorite;
+	@Column(name = "IS_BOOKMARK")
+	private boolean isBookmark;
 
 	@Column(name = "LIKE_COUNT")
 	private Integer likeCount;
@@ -54,10 +54,15 @@ public class DiskEntity extends BaseEntity {
 		if(dto.getContent() != null || !dto.getContent().isEmpty()) content = dto.getContent();
 		if(dto.getDiskColor() != null) diskColor = dto.getDiskColor();
 		if(dto.getIsPrivate() != null) isPrivate = dto.getIsPrivate();
-		if(dto.getIsFavorite() != null) isFavorite = dto.getIsFavorite();
+		if(dto.getIsFavorite() != null) isBookmark = dto.getIsFavorite();
 	}
 
 	public void likedDisk(){
 		likeCount ++;
+	}
+
+	public void bookmarkDisk(){
+		if(isBookmark) isBookmark = false;
+		else isBookmark = true;
 	}
 }

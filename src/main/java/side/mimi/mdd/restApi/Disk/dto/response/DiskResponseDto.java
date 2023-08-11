@@ -17,7 +17,7 @@ public class DiskResponseDto {
 	private String content;
 	private DiskColorEnum diskColor;
 	private Boolean isPrivate;
-	private Boolean isFavorite;
+	private Boolean isBookmark;
 	private Integer likeCount;
 	private Long diskOwnerId;
 	private String diskOwnerNickname;

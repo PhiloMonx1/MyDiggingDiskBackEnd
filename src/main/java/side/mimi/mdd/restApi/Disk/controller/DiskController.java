@@ -45,4 +45,9 @@ public class DiskController {
 	public ResponseEntity<Integer> likedDisk(@PathVariable Long diskId){
 		return ResponseEntity.ok().body(diskService.likedDisk(diskId));
 	}
+
+	@PostMapping("bookmark/{diskId}")
+	public ResponseEntity<Boolean> bookmarkDisk(@PathVariable Long diskId, @RequestHeader(name="Authorization") String token){
+		return ResponseEntity.ok().body(diskService.bookmarkDisk(diskId, token));
+	}
 }
