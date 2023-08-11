@@ -11,6 +11,8 @@ import side.mimi.mdd.restApi.Disk.model.enums.DiskColorEnum;
 import side.mimi.mdd.restApi.Member.model.MemberEntity;
 import side.mimi.mdd.utils.BaseEntity;
 
+import java.time.LocalDateTime;
+
 @Builder
 @Entity
 @Table(name="DISK")
@@ -37,7 +39,7 @@ public class DiskEntity extends BaseEntity {
 	private boolean isPrivate;
 
 	@Column(name = "IS_BOOKMARK")
-	private boolean isBookmark;
+	private LocalDateTime isBookmark;
 
 	@Column(name = "LIKE_COUNT")
 	private Integer likeCount;
@@ -50,11 +52,12 @@ public class DiskEntity extends BaseEntity {
 	private MemberEntity member;
 
 	public void modifyDisk(DiskModifyRequestDto dto){
-		if(dto.getDiskName() != null || !dto.getDiskName().isEmpty()) diskName = dto.getDiskName();
-		if(dto.getContent() != null || !dto.getContent().isEmpty()) content = dto.getContent();
+		if(dto.getDiskName() != null && !dto.getDiskName().isEmpty()) diskName = dto.getDiskName();
+		if(dto.getContent() != null && !dto.getContent().isEmpty()) content = dto.getContent();
 		if(dto.getDiskColor() != null) diskColor = dto.getDiskColor();
 		if(dto.getIsPrivate() != null) isPrivate = dto.getIsPrivate();
-		if(dto.getIsFavorite() != null) isBookmark = dto.getIsFavorite();
+		if(dto.getIsBookmark() != null && dto.getIsBookmark()) isBookmark = LocalDateTime.now();
+		if(dto.getIsBookmark() != null && !dto.getIsBookmark()) isBookmark = null;
 	}
 
 	public void likedDisk(){
@@ -62,7 +65,7 @@ public class DiskEntity extends BaseEntity {
 	}
 
 	public void bookmarkDisk(){
-		if(isBookmark) isBookmark = false;
-		else isBookmark = true;
+		if(isBookmark == null) isBookmark = LocalDateTime.now();
+		else isBookmark = null;
 	}
 }

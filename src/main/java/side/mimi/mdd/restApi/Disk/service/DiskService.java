@@ -12,6 +12,7 @@ import side.mimi.mdd.restApi.Disk.repository.DiskRepository;
 import side.mimi.mdd.restApi.Member.model.MemberEntity;
 import side.mimi.mdd.restApi.Member.service.MemberService;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -31,7 +32,7 @@ public class DiskService {
 						.content(disk.getContent())
 						.diskColor(disk.getDiskColor())
 						.isPrivate(disk.isPrivate())
-						.isBookmark(disk.isBookmark())
+						.isBookmark(disk.getIsBookmark() != null)
 						.likeCount(disk.getLikeCount())
 						.diskOwnerId(disk.getMember().getMemberId())
 						.diskOwnerNickname(disk.getMember().getNickname())
@@ -54,7 +55,7 @@ public class DiskService {
 				.content(disk.getContent())
 				.diskColor(disk.getDiskColor())
 				.isPrivate(disk.isPrivate())
-				.isBookmark(disk.isBookmark())
+				.isBookmark(disk.getIsBookmark() != null)
 				.likeCount(disk.getLikeCount())
 				.diskOwnerId(disk.getMember().getMemberId())
 				.diskOwnerNickname(disk.getMember().getNickname())
@@ -70,18 +71,18 @@ public class DiskService {
 		if(dto.getDiskName().length() > 30) throw new AppException(ErrorCode.OVER_LONG_DISK_NAME, ErrorCode.OVER_LONG_DISK_NAME.getMessage());
 		if(dto.getContent().length() > 300) throw new AppException(ErrorCode.OVER_LONG_CONTENT, ErrorCode.OVER_LONG_CONTENT.getMessage());
 
-		//isPrivate, isFavorite Default값 부여
+		//isPrivate, isBookmark Default값 부여
 		Boolean isPrivate = false;
-		Boolean isFavorite = false;
+		LocalDateTime isBookmark = null;
 		if(dto.getIsPrivate() != null) isPrivate = dto.getIsPrivate();
-		if(dto.getIsFavorite() != null) isFavorite = dto.getIsFavorite();
+		if(dto.getIsBookmark() != null && dto.getIsBookmark()) isBookmark = LocalDateTime.now();
 
 		DiskEntity disk = DiskEntity.builder()
 				.diskName(dto.getDiskName())
 				.content(dto.getContent())
 				.diskColor(dto.getDiskColor())
 				.isPrivate(isPrivate)
-				.isBookmark(isFavorite)
+				.isBookmark(isBookmark)
 				.likeCount(0)
 				.member(member)
 				.build();
@@ -94,7 +95,7 @@ public class DiskService {
 				.content(disk.getContent())
 				.diskColor(disk.getDiskColor())
 				.isPrivate(disk.isPrivate())
-				.isBookmark(disk.isBookmark())
+				.isBookmark(disk.getIsBookmark() != null)
 				.likeCount(disk.getLikeCount())
 				.diskOwnerId(disk.getMember().getMemberId())
 				.diskOwnerNickname(disk.getMember().getNickname())
@@ -123,7 +124,7 @@ public class DiskService {
 				.content(myDisk.getContent())
 				.diskColor(myDisk.getDiskColor())
 				.isPrivate(myDisk.isPrivate())
-				.isBookmark(myDisk.isBookmark())
+				.isBookmark(myDisk.getIsBookmark() != null)
 				.likeCount(myDisk.getLikeCount())
 				.diskOwnerId(myDisk.getMember().getMemberId())
 				.diskOwnerNickname(myDisk.getMember().getNickname())
@@ -166,6 +167,6 @@ public class DiskService {
 
 		disk.bookmarkDisk();
 		diskRepository.save(disk);
-		return disk.isBookmark();
+		return (disk.getIsBookmark() != null);
 	}
 }
