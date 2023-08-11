@@ -22,6 +22,9 @@ public class DiskService {
 	private final DiskRepository diskRepository;
 	private final MemberService memberService;
 
+	/**
+	 * 나의 디스크 모두 조회
+	 */
 	public List<DiskResponseDto> getMyDisks(String token) {
 		//TODO : 오버패칭 유지할 것인지에 대한 판단 필요
 		MemberEntity member = memberService.getMemberByJwt(token);
@@ -44,6 +47,9 @@ public class DiskService {
 				.collect(Collectors.toList());
 	}
 
+	/**
+	 * 특정 디스크 조회
+	 */
 	public DiskResponseDto getDiskById(Long diskId, String token) {
 		MemberEntity member = memberService.getMemberByJwt(token);
 
@@ -66,6 +72,9 @@ public class DiskService {
 				.build();
 	}
 
+	/**
+	 * 디스크 작성
+	 */
 	public DiskResponseDto postDisk(DiskPostRequestDto dto, String token) {
 		MemberEntity member = memberService.getMemberByJwt(token);
 		List<DiskEntity> bookmarkedDiskList = diskRepository.findAllByMemberMemberIdAndIsBookmarkNotNullOrderByIsBookmarkDesc(member.getMemberId());
@@ -109,6 +118,9 @@ public class DiskService {
 				.build();
 	}
 
+	/**
+	 * 디스크 수정
+	 */
 	public DiskResponseDto modifyDisk(Long diskId, DiskModifyRequestDto dto, String token) {
 		MemberEntity member = memberService.getMemberByJwt(token);
 		List<DiskEntity> bookmarkedDiskList = diskRepository.findAllByMemberMemberIdAndIsBookmarkNotNullOrderByIsBookmarkDesc(member.getMemberId());
@@ -142,6 +154,9 @@ public class DiskService {
 				.build();
 	}
 
+	/**
+	 * 디스크 삭제
+	 */
 	public Boolean deleteDisk(Long diskId, String token) {
 		MemberEntity member = memberService.getMemberByJwt(token);
 
@@ -154,6 +169,9 @@ public class DiskService {
 		return true;
 	}
 
+	/**
+	 * 디스크 좋아요
+	 */
 	public Integer likedDisk(Long diskId) {
 		DiskEntity disk = diskRepository.findById(diskId)
 				.orElseThrow(() ->new AppException(ErrorCode.NOT_FOUND_DISK, ErrorCode.NOT_FOUND_DISK.getMessage()));
@@ -164,6 +182,9 @@ public class DiskService {
 		return disk.getLikeCount();
 	}
 
+	/**
+	 * 디스크 북마크
+	 */
 	public Boolean bookmarkDisk(Long diskId, String token) {
 		MemberEntity member = memberService.getMemberByJwt(token);
 
