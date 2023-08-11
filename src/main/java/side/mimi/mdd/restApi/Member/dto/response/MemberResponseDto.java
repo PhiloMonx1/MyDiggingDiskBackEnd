@@ -17,9 +17,9 @@ public class MemberResponseDto {
 	private String interest;
 	private String introduce;
 	private Boolean isMe;
-	//TODO: Member 소유의 disk[] 정보
 	private Integer visitCount;
 	private Integer likeCount;
+	private String profileImg;
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
 	private LocalDateTime createdAt;
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")

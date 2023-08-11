@@ -6,6 +6,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import side.mimi.mdd.exception.AppException;
 import side.mimi.mdd.exception.ErrorCode;
 import side.mimi.mdd.restApi.Disk.repository.DiskRepository;
@@ -23,7 +24,9 @@ import side.mimi.mdd.restApi.Member.repository.TokenRepository;
 import side.mimi.mdd.utils.CombineRandomNickname;
 import side.mimi.mdd.utils.JwtUtil;
 import side.mimi.mdd.utils.RegexUtils;
+import side.mimi.mdd.utils.S3Util;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 
@@ -36,6 +39,7 @@ public class MemberService {
 	private final DiskRepository diskRepository;
 	private final TokenRepository tokenRepository;
 	private final BCryptPasswordEncoder encoder;
+	private final S3Util s3Util;
 	private final CombineRandomNickname generator = new CombineRandomNickname();
 
 
@@ -56,6 +60,7 @@ public class MemberService {
 				.introduce(member.getIntroduce())
 				.visitCount(member.getVisitCount())
 				.likeCount(likeCnt)
+				.profileImg(member.getProfileImg())
 				.isMe(true)
 				.createdAt(member.getCreatedAt())
 				.modifiedAt(member.getModifiedAt())
@@ -84,6 +89,7 @@ public class MemberService {
 				.interest(member.getInterest())
 				.introduce(member.getIntroduce())
 				.visitCount(member.getVisitCount())
+				.profileImg(member.getProfileImg())
 				.likeCount(likeCnt)
 				.isMe(memberByJwt != null && member.getMemberName().equals(memberByJwt.getMemberName()))
 				.createdAt(member.getCreatedAt())
@@ -104,7 +110,6 @@ public class MemberService {
 	public boolean checkNickname(String nickname) {
 		return memberRepository.findByNickname(nickname).isEmpty();
 	}
-
 
 	/**
 	 * 회원가입
@@ -132,6 +137,7 @@ public class MemberService {
 				.interest("")
 				.introduce("")
 				.visitCount(0)
+				.profileImg("")
 				.build();
 
 		memberRepository.save(member);
@@ -144,6 +150,7 @@ public class MemberService {
 				.introduce(member.getIntroduce())
 				.visitCount(member.getVisitCount())
 				.likeCount(0)
+				.profileImg(member.getProfileImg())
 				.isMe(true)
 				.createdAt(member.getCreatedAt())
 				.modifiedAt(member.getModifiedAt())
@@ -200,6 +207,7 @@ public class MemberService {
 				.introduce(selectedMember.getIntroduce())
 				.visitCount(selectedMember.getVisitCount())
 				.likeCount(likeCnt)
+				.profileImg(selectedMember.getProfileImg())
 				.isMe(true)
 				.createdAt(selectedMember.getCreatedAt())
 				.modifiedAt(selectedMember.getModifiedAt())
@@ -222,22 +230,43 @@ public class MemberService {
 	/**
 	 * 회원 정보 수정
 	 */
-	public Long modifyMemberInfo(MemberModifyRequestDto dto, String token) {
-		if(dto.getNickname() != null && dto.getNickname().length() > 10) throw new AppException(ErrorCode.WRONG_NICKNAME_VALID, ErrorCode.WRONG_NICKNAME_VALID.getMessage());
-		if(dto.getInterest() != null && dto.getInterest().length() > 10) throw new AppException(ErrorCode.WRONG_INTEREST_VALID, ErrorCode.WRONG_INTEREST_VALID.getMessage());
-		if(dto.getIntroduce() != null && dto.getIntroduce().length() > 30) throw new AppException(ErrorCode.WRONG_INTRODUCE_VALID, ErrorCode.WRONG_INTRODUCE_VALID.getMessage());
+	public MemberResponseDto modifyMemberInfo(MemberModifyRequestDto dto, String token, MultipartFile file) throws IOException {
+		if(dto != null){
+			if(dto.getNickname() != null && dto.getNickname().length() > 10) throw new AppException(ErrorCode.WRONG_NICKNAME_VALID, ErrorCode.WRONG_NICKNAME_VALID.getMessage());
+			if(dto.getInterest() != null && dto.getInterest().length() > 10) throw new AppException(ErrorCode.WRONG_INTEREST_VALID, ErrorCode.WRONG_INTEREST_VALID.getMessage());
+			if(dto.getIntroduce() != null && dto.getIntroduce().length() > 30) throw new AppException(ErrorCode.WRONG_INTRODUCE_VALID, ErrorCode.WRONG_INTRODUCE_VALID.getMessage());
+		}
 
 		MemberEntity member = getMemberByJwt(token);
+		Integer likeCnt = getTotalLikesByMemberId(member.getMemberId());
 
-		if(dto.getNickname() != null && !member.getNickname().equals(dto.getNickname())){
+		String profileImg = member.getProfileImg();
+
+		if(file != null){
+			profileImg = s3Util.uploadFile(file);
+		}
+
+		if(dto != null && dto.getNickname() != null && !member.getNickname().equals(dto.getNickname())){
 			memberRepository.findByNickname(dto.getNickname())
 					.ifPresent(memberEntity -> {throw new AppException(ErrorCode.MEMBER_NICKNAME_DUPLICATED, ErrorCode.MEMBER_NICKNAME_DUPLICATED.getMessage());});
 		}
 
 
-		member.modifyMemberInfo(dto);
+		if(dto != null) member.modifyMemberInfo(dto, profileImg);
 		memberRepository.save(member);
-		return member.getMemberId();
+		return MemberResponseDto.builder()
+				.memberId(member.getMemberId())
+				.memberName(member.getMemberName())
+				.nickname(member.getNickname())
+				.interest(member.getInterest())
+				.introduce(member.getIntroduce())
+				.visitCount(member.getVisitCount())
+				.likeCount(likeCnt)
+				.profileImg(member.getProfileImg())
+				.isMe(true)
+				.createdAt(member.getCreatedAt())
+				.modifiedAt(member.getModifiedAt())
+				.build();
 	}
 
 	/**
@@ -270,6 +299,7 @@ public class MemberService {
 				.introduce(member.getIntroduce())
 				.visitCount(member.getVisitCount())
 				.likeCount(likeCnt)
+				.profileImg(member.getProfileImg())
 				.isMe(true)
 				.createdAt(member.getCreatedAt())
 				.modifiedAt(member.getModifiedAt())
