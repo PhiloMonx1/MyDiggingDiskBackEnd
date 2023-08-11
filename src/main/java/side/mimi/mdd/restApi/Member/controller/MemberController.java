@@ -3,12 +3,15 @@ package side.mimi.mdd.restApi.Member.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import side.mimi.mdd.restApi.Member.dto.request.MemberJoinRequestDto;
 import side.mimi.mdd.restApi.Member.dto.request.MemberLoginRequestDto;
 import side.mimi.mdd.restApi.Member.dto.request.MemberModifyRequestDto;
 import side.mimi.mdd.restApi.Member.dto.response.MemberResponseDto;
 import side.mimi.mdd.restApi.Member.dto.response.MemberTokenResponseDto;
 import side.mimi.mdd.restApi.Member.service.MemberService;
+
+import java.io.IOException;
 
 @RestController
 @RequiredArgsConstructor
@@ -69,8 +72,10 @@ public class MemberController {
 	 * 회원 정보 수정
 	 */
 	@PatchMapping("")
-	public ResponseEntity<Long> modifyMemberInfo(@RequestBody MemberModifyRequestDto dto, @RequestHeader(name="Authorization") String token){
-		return ResponseEntity.ok().body(memberService.modifyMemberInfo(dto, token));
+	public ResponseEntity<MemberResponseDto> modifyMemberInfo(@RequestPart(value = "data", required = false)  MemberModifyRequestDto dto,
+	                                             @RequestHeader(name="Authorization") String token,
+	                                             @RequestPart(value = "file", required = false) MultipartFile file) throws IOException {
+		return ResponseEntity.ok().body(memberService.modifyMemberInfo(dto, token, file));
 	}
 
 	/**
