@@ -74,6 +74,9 @@ public class MemberService {
 		//TODO : 맴버가 가진 모든 디스크의 like 수를 더한 값
 		Integer likeCnt = 0;
 
+		//조회수 증가
+		if(memberByJwt != null && !member.getMemberName().equals(memberByJwt.getMemberName())) viewCntIncrease(member);
+
 		return MemberResponseDto.builder()
 				.memberId(member.getMemberId())
 				.memberName(member.getMemberName())
@@ -286,6 +289,7 @@ public class MemberService {
 	 * 서비스 로직 함수 모음
 	 * 1. isLoginOverFailed = 로그인 자동 공격 방지 함수 (비밀번호 5회 틀릴 시 1분 동안 true)
 	 * 2. getMemberByJwt = 토큰에서 맴버 객체 뽑기
+	 * 3. viewCntIncrease = 맴버 페이지 조회 수 증가
 	 */
 	private boolean isLoginOverFailed(String memberName) {
 		PageRequest pageRequest = PageRequest.of(0, 5, Sort.by(Sort.Direction.DESC, "createdAt"));
@@ -304,5 +308,10 @@ public class MemberService {
 		String memberName = JwtUtil.getMemberName(token);
 		return memberRepository.findByMemberName(memberName)
 				.orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND_MEMBER, ErrorCode.NOT_FOUND_MEMBER.getMessage()));
+	}
+
+	private void viewCntIncrease(MemberEntity member){
+		member.viewCntIncrease();
+		memberRepository.save(member);
 	}
 }
