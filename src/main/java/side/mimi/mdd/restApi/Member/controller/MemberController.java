@@ -95,4 +95,8 @@ public class MemberController {
 		return ResponseEntity.ok().body(memberService.reissueToken(refreshToken, response));
 	}
 
+	@GetMapping("/test/token")
+	public ResponseEntity<MemberTokenResponseDto> testToken(HttpServletResponse response){
+		return ResponseEntity.ok().body(memberService.testToken(response));
+	}
 }
