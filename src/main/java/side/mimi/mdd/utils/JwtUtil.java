@@ -100,8 +100,11 @@ public class JwtUtil {
 			DecodedJWT decodedJWT = decodedToken(token);
 			return decodedJWT.getClaim("memberName").asString();
 		}catch (Exception e){
-			DecodedJWT decodedJWT = verifyRefreshToken(token);
-			return decodedJWT.getClaim("memberName").asString();
+			if(!e.getMessage().equals("만료시간이 지난 토큰입니다.")){
+				DecodedJWT decodedJWT = verifyRefreshToken(token);
+				return decodedJWT.getClaim("memberName").asString();
+			}
+			throw new AppException(ErrorCode.EXPIRED_TOKEN, ErrorCode.EXPIRED_TOKEN.getMessage());
 		}
 	}
 
