@@ -14,5 +14,5 @@ public class DiskModifyRequestDto {
 	private DiskColorEnum diskColor;
 	private Boolean isPrivate;
 	private Boolean isBookmark;
-	private List<Integer> deleteImgList;
+	private Long[] deleteImgList;
 }

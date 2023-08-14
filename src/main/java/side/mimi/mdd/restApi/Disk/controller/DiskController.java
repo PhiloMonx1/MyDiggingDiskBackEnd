@@ -48,8 +48,11 @@ public class DiskController {
 	 * 디스크 수정
 	 */
 	@PatchMapping("/{diskId}")
-	public ResponseEntity<DiskResponseDto> modifyDisk(@PathVariable Long diskId, @RequestBody DiskModifyRequestDto dto, @RequestHeader(name="Authorization") String token){
-		return ResponseEntity.ok().body(diskService.modifyDisk(diskId, dto, token));
+	public ResponseEntity<DiskResponseDto> modifyDisk(@PathVariable Long diskId,
+	                                                  @RequestPart(value = "data", required = false) DiskModifyRequestDto dto,
+	                                                  @RequestHeader(name="Authorization") String token,
+	                                                  @RequestPart(value = "file", required = false) MultipartFile[] files) throws IOException {
+		return ResponseEntity.ok().body(diskService.modifyDisk(diskId, dto, token, files));
 	}
 
 	/**

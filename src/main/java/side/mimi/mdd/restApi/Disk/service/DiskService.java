@@ -168,22 +168,60 @@ public class DiskService {
 	/**
 	 * 디스크 수정
 	 */
-	public DiskResponseDto modifyDisk(Long diskId, DiskModifyRequestDto dto, String token) {
+	public DiskResponseDto modifyDisk(Long diskId, DiskModifyRequestDto dto, String token, MultipartFile[] files) throws IOException {
 		MemberEntity member = memberService.getMemberByJwt(token);
 		List<DiskEntity> bookmarkedDiskList = diskRepository.findAllByMemberMemberIdAndIsBookmarkNotNullOrderByIsBookmarkDesc(member.getMemberId());
 
 		DiskEntity myDisk = diskRepository.findById(diskId)
 						.orElseThrow(() ->new AppException(ErrorCode.NOT_FOUND_DISK, ErrorCode.NOT_FOUND_DISK.getMessage()));
 
+		if(dto != null){
 		if(myDisk.getMember().getMemberId() != member.getMemberId()) throw new AppException(ErrorCode.NOT_DISK_OWNER, ErrorCode.NOT_DISK_OWNER.getMessage());
 		if(dto.getDiskName() != null && dto.getDiskName().length() > 30) throw new AppException(ErrorCode.OVER_LONG_DISK_NAME, ErrorCode.OVER_LONG_DISK_NAME.getMessage());
 		if(dto.getContent() != null && dto.getContent().length() > 300) throw new AppException(ErrorCode.OVER_LONG_CONTENT, ErrorCode.OVER_LONG_CONTENT.getMessage());
+		}
 
 		if (bookmarkedDiskList.size() >= 3 && bookmarkedDiskList.stream().noneMatch(bookmarkedDisk -> bookmarkedDisk.getDiskId().equals(myDisk.getDiskId())))
 			throw new AppException(ErrorCode.BOOKMARK_DISK_LIMIT, ErrorCode.BOOKMARK_DISK_LIMIT.getMessage());
+		
+		//이미지 처리
+		if(dto.getDeleteImgList().length > 0) for(Long imgId : dto.getDeleteImgList()) imgRepository.deleteById(imgId);
 
-		myDisk.modifyDisk(dto);
+		List<DiskImgEntity> images = myDisk.getDiskImgList();
+		if (files != null) {
+			for (MultipartFile file : files) {
+				if (file != null && !file.isEmpty()) {
+					String imageUrl = s3Util.uploadFile(file);
+
+					DiskImgEntity diskImgEntity = DiskImgEntity.builder()
+							.imgUrl(imageUrl)
+							.img_status(true)
+							.disk(myDisk)
+							.build();
+
+					images.add(diskImgEntity);
+					imgRepository.save(diskImgEntity);
+				}
+			}
+		}
+
+		myDisk.setDiskImgList(images);
+
+		if(dto != null) myDisk.modifyDisk(dto);
 		diskRepository.save(myDisk);
+
+		List<DiskImgDto> imageDtoList = new ArrayList<>();
+
+		for (DiskImgEntity image : myDisk.getDiskImgList()){
+			DiskImgDto diskImgDto = DiskImgDto.builder()
+					.imgId(image.getImgId())
+					.imgUrl(image.getImgUrl())
+					.createdAt(image.getCreatedAt())
+					.modifiedAt(image.getModifiedAt())
+					.build();
+
+			imageDtoList.add(diskImgDto);
+		}
 
 		return DiskResponseDto.builder()
 				.diskId(myDisk.getDiskId())
@@ -196,6 +234,7 @@ public class DiskService {
 				.diskOwnerId(myDisk.getMember().getMemberId())
 				.diskOwnerNickname(myDisk.getMember().getNickname())
 				.isMine(true)
+				.image(imageDtoList)
 				.createdAt(myDisk.getCreatedAt())
 				.modifiedAt(myDisk.getModifiedAt())
 				.build();
