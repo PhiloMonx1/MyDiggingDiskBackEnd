@@ -1,6 +1,7 @@
 package side.mimi.mdd.restApi.Disk.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -12,6 +13,7 @@ import side.mimi.mdd.restApi.Member.model.MemberEntity;
 import side.mimi.mdd.utils.BaseEntity;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Builder
 @Entity
@@ -44,7 +46,10 @@ public class DiskEntity extends BaseEntity {
 	@Column(name = "LIKE_COUNT")
 	private Integer likeCount;
 
-	//TODO : diskImgIdList 추가
+	@Column(name = "DISK_IMG-LIST")
+	@OneToMany(mappedBy = "disk", cascade = CascadeType.ALL, orphanRemoval = true)
+	@JsonManagedReference
+	private List<DiskImgEntity> diskImgList;
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JsonBackReference

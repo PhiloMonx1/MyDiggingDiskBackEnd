@@ -1,5 +1,6 @@
 package side.mimi.mdd.restApi.Disk.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -24,4 +25,9 @@ public class DiskImgEntity extends BaseEntity {
 
 	@Column(name = "IMG_STATUS")
 	private Boolean img_status;
+
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JsonBackReference
+	@JoinColumn(name = "DISK_ID")
+	private DiskEntity disk;
 }
