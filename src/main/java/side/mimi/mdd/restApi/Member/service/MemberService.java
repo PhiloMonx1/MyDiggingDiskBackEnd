@@ -1,9 +1,11 @@
 package side.mimi.mdd.restApi.Member.service;
 
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpHeaders;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -113,10 +115,9 @@ public class MemberService {
 	/**
 	 * 회원가입
 	 */
-	public MemberTokenResponseDto join(MemberJoinRequestDto dto){
+	public MemberTokenResponseDto join(MemberJoinRequestDto dto, HttpServletResponse response){
 		//TODO : 디스크 생성까지 같이 받을지에 대한 논의
 		//TODO : 최소 글자 수 및 빈값에 대한 예외처리
-		//TODO : 토큰 헤더에 담기
 		if(dto.getMemberName().isEmpty() || dto.getPassword().isEmpty()) throw new AppException(ErrorCode.EMPTY_JOIN_REQUEST, ErrorCode.EMPTY_JOIN_REQUEST.getMessage());
 		String memberName = dto.getMemberName().toLowerCase();
 		String nickname = generator.getRandomNickname();
@@ -157,15 +158,19 @@ public class MemberService {
 				.modifiedAt(member.getModifiedAt())
 				.build();
 
+		String accessToken = JwtUtil.createAccessToken(member.getMemberName());
 		String refreshToken = JwtUtil.createRefreshToken(member.getMemberId());
 		tokenRepository.save(TokenEntity.builder()
 						.memberId(member.getMemberId())
 						.token(refreshToken)
 				.build());
 
+		response.setHeader("accessToken", accessToken);
+		response.setHeader("refreshToken", refreshToken);
+
 		return  MemberTokenResponseDto.builder()
 				.memberInfo(memberResponseDto)
-				.accessToken(JwtUtil.createAccessToken(member.getMemberName()))
+				.accessToken(accessToken)
 				.refreshToken(refreshToken)
 				.build();
 	}
@@ -173,7 +178,7 @@ public class MemberService {
 	/**
 	 * 로그인
 	 */
-	public MemberTokenResponseDto login(MemberLoginRequestDto dto) {
+	public MemberTokenResponseDto login(MemberLoginRequestDto dto,  HttpServletResponse response) {
 		MemberEntity selectedMember = memberRepository.findByMemberName(dto.getMemberName().toLowerCase())
 				.orElseThrow(() ->new AppException(ErrorCode.MEMBER_NAME_NOT_FOUND, ErrorCode.MEMBER_NAME_NOT_FOUND.getMessage()));
 
@@ -214,15 +219,19 @@ public class MemberService {
 				.modifiedAt(selectedMember.getModifiedAt())
 				.build();
 
+		String accessToken = JwtUtil.createAccessToken(selectedMember.getMemberName());
 		String refreshToken = JwtUtil.createRefreshToken(selectedMember.getMemberId());
 		tokenRepository.save(TokenEntity.builder()
 				.memberId(selectedMember.getMemberId())
 				.token(refreshToken)
 				.build());
 
+		response.setHeader("accessToken", accessToken);
+		response.setHeader("refreshToken", refreshToken);
+
 		return  MemberTokenResponseDto.builder()
 				.memberInfo(memberResponseDto)
-				.accessToken(JwtUtil.createAccessToken(selectedMember.getMemberName()))
+				.accessToken(accessToken)
 				.refreshToken(refreshToken)
 				.build();
 	}
@@ -282,7 +291,7 @@ public class MemberService {
 	/**
 	 * 토큰 재발급
 	 */
-	public MemberTokenResponseDto reissueToken(String refreshToken) {
+	public MemberTokenResponseDto reissueToken(String refreshToken, HttpServletResponse response) {
 		Long memberId = JwtUtil.verifyRefreshToken(refreshToken);
 		TokenEntity token = tokenRepository.findById(memberId)
 				.orElseThrow(()-> new AppException(ErrorCode.BLACKLIST_TOKEN, ErrorCode.BLACKLIST_TOKEN.getMessage()));
@@ -306,9 +315,14 @@ public class MemberService {
 				.modifiedAt(member.getModifiedAt())
 				.build();
 
+		String accessToken = JwtUtil.createAccessToken(member.getMemberName());
+
+		response.setHeader("accessToken", accessToken);
+		response.setHeader("refreshToken", refreshToken);
+
 		return MemberTokenResponseDto.builder()
 				.memberInfo(memberResponseDto)
-				.accessToken(JwtUtil.createAccessToken(member.getMemberName()))
+				.accessToken(accessToken)
 				.refreshToken(refreshToken)
 				.build();
 	}
@@ -349,5 +363,48 @@ public class MemberService {
 		Integer totalLikes = diskRepository.getTotalLikesByMemberId(memberId);
 		if (totalLikes == null) return 0;
 		return totalLikes;
+	}
+
+	public MemberTokenResponseDto testToken(HttpServletResponse response) {
+		MemberEntity testMember = MemberEntity.builder()
+				.memberName("testMember".toLowerCase())
+				.nickname("양파쿵야")
+				.password(encoder.encode("123456"))
+				.interest("샐러리쿵야랑놀기")
+				.introduce("나는야 귀여운 양파쿵야 모두 나를 따르라~ 우하하^^")
+				.profileImg("https://i.namu.wiki/i/y7qTOOIL6nIa2cXybk511OASqwAGMgZiNjh6CtErz0ust7MPJaztzSYiypYevehQOjdJc-TQvTctUk7N629V7A.webp")
+				.visitCount(0)
+				.build();
+		memberRepository.save(testMember);
+
+		MemberResponseDto memberResponseDto = MemberResponseDto.builder()
+				.memberId(testMember.getMemberId())
+				.memberName(testMember.getMemberName())
+				.nickname(testMember.getNickname())
+				.interest(testMember.getInterest())
+				.introduce(testMember.getIntroduce())
+				.visitCount(testMember.getVisitCount())
+				.likeCount(0)
+				.profileImg(testMember.getProfileImg())
+				.isMe(true)
+				.createdAt(testMember.getCreatedAt())
+				.modifiedAt(testMember.getModifiedAt())
+				.build();
+
+		String accessToken = JwtUtil.createAccessToken(testMember.getMemberName());
+		String refreshToken = JwtUtil.createRefreshToken(testMember.getMemberId());
+		tokenRepository.save(TokenEntity.builder()
+				.memberId(testMember.getMemberId())
+				.token(refreshToken)
+				.build());
+
+		response.setHeader("accessToken", accessToken);
+		response.setHeader("refreshToken", refreshToken);
+
+		return  MemberTokenResponseDto.builder()
+				.memberInfo(memberResponseDto)
+				.accessToken(accessToken)
+				.refreshToken(refreshToken)
+				.build();
 	}
 }

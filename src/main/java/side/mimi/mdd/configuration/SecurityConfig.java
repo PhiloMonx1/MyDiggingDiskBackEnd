@@ -47,6 +47,7 @@ public class SecurityConfig {
 						//h2-console (개발단계 허용)
 						.requestMatchers(PathRequest.toH2Console()).permitAll()
 						//전체 허용 (개발단계 전체 API 허용)
+						.requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.GET,"/api/v1/members/test/token")).permitAll()
 //						.requestMatchers(AntPathRequestMatcher.antMatcher("/api/**")).permitAll()
 						//MEMBER API.
 						.requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.POST,"/api/v1/members/join")).permitAll()
