@@ -77,6 +77,51 @@ public class DiskService {
 	}
 
 	/**
+	 * 나의 대표 디스크 모두 조회
+	 */
+	public List<DiskResponseDto> getMyBookmarkedDisks(String token) {
+		MemberEntity member = memberService.getMemberByJwt(token);
+		List<DiskEntity> myDisks = diskRepository.findAllByMemberMemberIdAndIsBookmarkNotNullOrderByIsBookmarkDesc(member.getMemberId());
+
+		List<DiskResponseDto> responseDtoList = new ArrayList<>();
+
+		for(DiskEntity myDisk : myDisks) {
+			List<DiskImgDto> imageDtoList = new ArrayList<>();
+
+			for (DiskImgEntity image : myDisk.getDiskImgList()) {
+				DiskImgDto diskImgDto = DiskImgDto.builder()
+						.imgId(image.getImgId())
+						.imgUrl(image.getImgUrl())
+						.createdAt(image.getCreatedAt())
+						.modifiedAt(image.getModifiedAt())
+						.build();
+
+				imageDtoList.add(diskImgDto);
+			}
+
+			DiskResponseDto responseDto = DiskResponseDto.builder()
+					.diskId(myDisk.getDiskId())
+					.diskName(myDisk.getDiskName())
+					.content(myDisk.getContent())
+					.diskColor(myDisk.getDiskColor())
+					.isPrivate(myDisk.isPrivate())
+					.isBookmark(myDisk.getIsBookmark() != null)
+					.likeCount(myDisk.getLikeCount())
+					.diskOwnerId(myDisk.getMember().getMemberId())
+					.diskOwnerNickname(myDisk.getMember().getNickname())
+					.isMine(true)
+					.image(imageDtoList)
+					.createdAt(myDisk.getCreatedAt())
+					.modifiedAt(myDisk.getModifiedAt())
+					.build();
+
+			responseDtoList.add(responseDto);
+		}
+
+		return responseDtoList;
+	}
+
+	/**
 	 * 특정 디스크 조회
 	 */
 	public DiskResponseDto getDiskById(Long diskId, String token) {
@@ -348,4 +393,6 @@ public class DiskService {
 		diskRepository.save(disk);
 		return (disk.getIsBookmark() != null);
 	}
+
+
 }

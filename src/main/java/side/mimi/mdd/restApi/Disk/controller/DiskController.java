@@ -27,6 +27,14 @@ public class DiskController {
 	}
 
 	/**
+	 * 나의 대표 디스크 모두 조회
+	 */
+	@GetMapping("/mydisks/bookmarked")
+	public ResponseEntity<List<DiskResponseDto>> getMyBookmarkedDisks(@RequestHeader(name="Authorization") String token){
+		return ResponseEntity.ok().body(diskService.getMyBookmarkedDisks(token));
+	}
+
+	/**
 	 * 특정 디스크 조회
 	 */
 	@GetMapping("/{diskId}")
