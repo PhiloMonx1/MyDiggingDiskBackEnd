@@ -12,5 +12,5 @@ public class DiskPostRequestDto {
 	private DiskColorEnum diskColor;
 	private Boolean isPrivate;
 	private Boolean isBookmark;
-	// TODO : 이미지
+	private Boolean isTest;
 }
