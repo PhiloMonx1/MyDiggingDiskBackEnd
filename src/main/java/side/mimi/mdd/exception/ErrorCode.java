@@ -49,6 +49,7 @@ public enum ErrorCode {
 	 */
 	//이미지 형식 오류
 	NOT_SUPPORTED_FILE_TYPE(HttpStatus.NOT_FOUND, "MultipartFile은 현재 PNG, JPG, JPGE 타입만 지원하고 있습니다."),
+	IMG_COUNT_LIMIT(HttpStatus.NOT_FOUND, "MultipartFile은 한 번에 4개를 초과해서 등록 요청할 수 없습니다."),
 	;
 
 	private HttpStatus httpStatus;

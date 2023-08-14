@@ -73,4 +73,8 @@ public class DiskEntity extends BaseEntity {
 		if(isBookmark == null) isBookmark = LocalDateTime.now();
 		else isBookmark = null;
 	}
+
+	public void setDiskImgList(List<DiskImgEntity> diskImgList) {
+		this.diskImgList = diskImgList;
+	}
 }

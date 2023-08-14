@@ -3,11 +3,13 @@ package side.mimi.mdd.restApi.Disk.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import side.mimi.mdd.restApi.Disk.dto.request.DiskModifyRequestDto;
 import side.mimi.mdd.restApi.Disk.dto.request.DiskPostRequestDto;
 import side.mimi.mdd.restApi.Disk.dto.response.DiskResponseDto;
 import side.mimi.mdd.restApi.Disk.service.DiskService;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -36,8 +38,10 @@ public class DiskController {
 	 * 디스크 작성
 	 */
 	@PostMapping("")
-	public ResponseEntity<DiskResponseDto> postDisk(@RequestBody DiskPostRequestDto dto, @RequestHeader(name="Authorization") String token){
-		return ResponseEntity.ok().body(diskService.postDisk(dto, token));
+	public ResponseEntity<DiskResponseDto> postDisk(@RequestPart(value = "data", required = false) DiskPostRequestDto dto,
+	                                                @RequestHeader(name="Authorization") String token,
+	                                                @RequestPart(value = "file", required = false) MultipartFile[] files) throws IOException {
+		return ResponseEntity.ok().body(diskService.postDisk(dto, token, files));
 	}
 
 	/**

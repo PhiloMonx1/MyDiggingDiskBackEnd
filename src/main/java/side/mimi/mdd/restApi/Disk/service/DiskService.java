@@ -2,17 +2,24 @@ package side.mimi.mdd.restApi.Disk.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import side.mimi.mdd.exception.AppException;
 import side.mimi.mdd.exception.ErrorCode;
+import side.mimi.mdd.restApi.Disk.dto.DiskImgDto;
 import side.mimi.mdd.restApi.Disk.dto.request.DiskModifyRequestDto;
 import side.mimi.mdd.restApi.Disk.dto.request.DiskPostRequestDto;
 import side.mimi.mdd.restApi.Disk.dto.response.DiskResponseDto;
 import side.mimi.mdd.restApi.Disk.model.DiskEntity;
+import side.mimi.mdd.restApi.Disk.model.DiskImgEntity;
+import side.mimi.mdd.restApi.Disk.repository.DiskImgRepository;
 import side.mimi.mdd.restApi.Disk.repository.DiskRepository;
 import side.mimi.mdd.restApi.Member.model.MemberEntity;
 import side.mimi.mdd.restApi.Member.service.MemberService;
+import side.mimi.mdd.utils.S3Util;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -21,6 +28,8 @@ import java.util.stream.Collectors;
 public class DiskService {
 	private final DiskRepository diskRepository;
 	private final MemberService memberService;
+	private final S3Util s3Util;
+	private final DiskImgRepository imgRepository;
 
 	/**
 	 * 나의 디스크 모두 조회
@@ -75,7 +84,7 @@ public class DiskService {
 	/**
 	 * 디스크 작성
 	 */
-	public DiskResponseDto postDisk(DiskPostRequestDto dto, String token) {
+	public DiskResponseDto postDisk(DiskPostRequestDto dto, String token, MultipartFile[] files) throws IOException {
 		MemberEntity member = memberService.getMemberByJwt(token);
 		List<DiskEntity> bookmarkedDiskList = diskRepository.findAllByMemberMemberIdAndIsBookmarkNotNullOrderByIsBookmarkDesc(member.getMemberId());
 
@@ -83,6 +92,7 @@ public class DiskService {
 		if(dto.getContent().length() > 300) throw new AppException(ErrorCode.OVER_LONG_CONTENT, ErrorCode.OVER_LONG_CONTENT.getMessage());
 		if(dto.getIsBookmark() != null && dto.getIsBookmark() && bookmarkedDiskList.size() >= 3)
 			throw new AppException(ErrorCode.BOOKMARK_DISK_LIMIT, ErrorCode.BOOKMARK_DISK_LIMIT.getMessage());
+		if(files.length > 4) throw new AppException(ErrorCode.IMG_COUNT_LIMIT, ErrorCode.IMG_COUNT_LIMIT.getMessage());
 
 		//isPrivate, isBookmark Default값 부여
 		Boolean isPrivate = false;
@@ -102,6 +112,40 @@ public class DiskService {
 
 		diskRepository.save(disk);
 
+		List<DiskImgEntity> images = new ArrayList<>();
+		if (files != null) {
+			for (MultipartFile file : files) {
+				if (file != null && !file.isEmpty()) {
+					String imageUrl = s3Util.uploadFile(file);
+
+					DiskImgEntity diskImgEntity = DiskImgEntity.builder()
+							.imgUrl(imageUrl)
+							.img_status(true)
+							.disk(disk)
+							.build();
+
+					images.add(diskImgEntity);
+					imgRepository.save(diskImgEntity);
+				}
+			}
+		}
+
+		disk.setDiskImgList(images);
+		diskRepository.save(disk);
+
+		List<DiskImgDto> imageDtoList = new ArrayList<>();
+
+		for (DiskImgEntity image : images){
+			DiskImgDto diskImgDto = DiskImgDto.builder()
+					.imgId(image.getImgId())
+					.imgUrl(image.getImgUrl())
+					.createdAt(image.getCreatedAt())
+					.modifiedAt(image.getModifiedAt())
+					.build();
+
+			imageDtoList.add(diskImgDto);
+		}
+
 		return DiskResponseDto.builder()
 				.diskId(disk.getDiskId())
 				.diskName(disk.getDiskName())
@@ -113,6 +157,7 @@ public class DiskService {
 				.diskOwnerId(disk.getMember().getMemberId())
 				.diskOwnerNickname(disk.getMember().getNickname())
 				.isMine(true)
+				.image(imageDtoList)
 				.createdAt(disk.getCreatedAt())
 				.modifiedAt(disk.getModifiedAt())
 				.build();
