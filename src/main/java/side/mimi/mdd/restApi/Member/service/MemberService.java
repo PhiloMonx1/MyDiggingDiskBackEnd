@@ -159,10 +159,10 @@ public class MemberService {
 				.build();
 
 		String accessToken = JwtUtil.createAccessToken(member.getMemberName());
-		String refreshToken = JwtUtil.createRefreshToken(member.getMemberId());
+		String refreshToken = JwtUtil.createRefreshToken(member.getMemberName() ,member.getMemberId());
 		tokenRepository.save(TokenEntity.builder()
 						.memberId(member.getMemberId())
-						.token(refreshToken)
+						.token("Bearer " + refreshToken)
 				.build());
 
 		response.setHeader("accessToken", accessToken);
@@ -220,10 +220,10 @@ public class MemberService {
 				.build();
 
 		String accessToken = JwtUtil.createAccessToken(selectedMember.getMemberName());
-		String refreshToken = JwtUtil.createRefreshToken(selectedMember.getMemberId());
+		String refreshToken = JwtUtil.createRefreshToken(selectedMember.getMemberName() ,selectedMember.getMemberId());
 		tokenRepository.save(TokenEntity.builder()
 				.memberId(selectedMember.getMemberId())
-				.token(refreshToken)
+				.token("Bearer " + refreshToken)
 				.build());
 
 		response.setHeader("accessToken", accessToken);
@@ -292,7 +292,7 @@ public class MemberService {
 	 * 토큰 재발급
 	 */
 	public MemberTokenResponseDto reissueToken(String refreshToken, HttpServletResponse response) {
-		Long memberId = JwtUtil.verifyRefreshToken(refreshToken);
+		Long memberId = JwtUtil.verifyRefreshToken(refreshToken).getClaim("memberId").asLong();
 		TokenEntity token = tokenRepository.findById(memberId)
 				.orElseThrow(()-> new AppException(ErrorCode.BLACKLIST_TOKEN, ErrorCode.BLACKLIST_TOKEN.getMessage()));
 		if(!token.getToken().equals(refreshToken)) throw new AppException(ErrorCode.BLACKLIST_TOKEN, ErrorCode.BLACKLIST_TOKEN.getMessage());
@@ -392,10 +392,10 @@ public class MemberService {
 				.build();
 
 		String accessToken = JwtUtil.createAccessToken(testMember.getMemberName());
-		String refreshToken = JwtUtil.createRefreshToken(testMember.getMemberId());
+		String refreshToken = JwtUtil.createRefreshToken(testMember.getMemberName(), testMember.getMemberId());
 		tokenRepository.save(TokenEntity.builder()
 				.memberId(testMember.getMemberId())
-				.token(refreshToken)
+				.token("Bearer " + refreshToken)
 				.build());
 
 		response.setHeader("accessToken", accessToken);
