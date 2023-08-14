@@ -35,6 +35,22 @@ public class DiskController {
 	}
 
 	/**
+	 * 특정 맴버의 디스크 모두 조회
+	 */
+	@GetMapping("/all/{memberId}")
+	public ResponseEntity<List<DiskResponseDto>> getDisksByMemberId(@PathVariable Long memberId, @RequestHeader(name="Authorization", required = false) String token){
+		return ResponseEntity.ok().body(diskService.getDisksByMemberId(memberId, token));
+	}
+
+	/**
+	 * 특정 맴버의 대표 디스크 모두 조회
+	 */
+	@GetMapping("/all/bookmarked/{memberId}")
+	public ResponseEntity<List<DiskResponseDto>> getBookmarkedDisksByMemberId(@PathVariable Long memberId, @RequestHeader(name="Authorization", required = false) String token){
+		return ResponseEntity.ok().body(diskService.getBookmarkedDisksByMemberId(memberId, token));
+	}
+
+	/**
 	 * 특정 디스크 조회
 	 */
 	@GetMapping("/{diskId}")
