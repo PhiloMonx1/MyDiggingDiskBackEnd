@@ -234,6 +234,21 @@ public class DiskService {
 			throw new AppException(ErrorCode.BOOKMARK_DISK_LIMIT, ErrorCode.BOOKMARK_DISK_LIMIT.getMessage());
 		
 		//이미지 처리
+		if(dto.getDeleteImgList() != null && dto.getDeleteImgList().length > 0) {
+			for(Long imgId : dto.getDeleteImgList()) {
+				imgRepository.deleteById(imgId);
+
+				DiskImgEntity removedImage = myDisk.getDiskImgList().stream()
+						.filter(diskImg -> diskImg.getImgId().equals(imgId))
+						.findFirst()
+						.orElse(null);
+
+				if (removedImage != null) {
+					myDisk.getDiskImgList().remove(removedImage);
+				}
+			}
+		}
+
 		List<DiskImgEntity> images = myDisk.getDiskImgList();
 		if (files != null) {
 			for (MultipartFile file : files) {
@@ -251,9 +266,6 @@ public class DiskService {
 				}
 			}
 		}
-
-		if(dto.getDeleteImgList() != null && dto.getDeleteImgList().length > 0)
-			for(Long imgId : dto.getDeleteImgList()) imgRepository.deleteById(imgId);
 
 		myDisk.setDiskImgList(images);
 
