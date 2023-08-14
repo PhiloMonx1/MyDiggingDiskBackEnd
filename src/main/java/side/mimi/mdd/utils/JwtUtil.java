@@ -35,7 +35,7 @@ public class JwtUtil {
 		Date issuedTime = new Date();
 		Date expirationTime = new Date(issuedTime.getTime() + expireTimeMs);
 
-		if(memberName.equals("testMember")){
+		if(memberName.equals("testMember".toLowerCase())){
 			expirationTime = new Date(issuedTime.getTime() + 15000);
 		}
 
