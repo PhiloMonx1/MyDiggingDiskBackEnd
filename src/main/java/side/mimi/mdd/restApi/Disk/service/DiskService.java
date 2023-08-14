@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -207,21 +206,34 @@ public class DiskService {
 		MemberEntity member = memberService.getMemberByJwt(token);
 		List<DiskEntity> bookmarkedDiskList = diskRepository.findAllByMemberMemberIdAndIsBookmarkNotNullOrderByIsBookmarkDesc(member.getMemberId());
 
+		// 삭제할 이미지 검증
+		if (dto != null && dto.getDeleteImgList() != null) {
+			for (Long imgId : dto.getDeleteImgList()) {
+				DiskImgEntity imgEntity = imgRepository.findById(imgId)
+						.orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND_IMG,"ID:{"+imgId+"} "+ ErrorCode.NOT_FOUND_IMG.getMessage()));
+			}
+		}
+
 		DiskEntity myDisk = diskRepository.findById(diskId)
 						.orElseThrow(() ->new AppException(ErrorCode.NOT_FOUND_DISK, ErrorCode.NOT_FOUND_DISK.getMessage()));
+
+		//이미지 갯수 예외처리
+		int deleteImgListLength = (dto != null && dto.getDeleteImgList() != null) ? dto.getDeleteImgList().length : 0;
+		int filesLength = (files != null) ? files.length : 0;
+		if((myDisk.getDiskImgList().size() - deleteImgListLength) + filesLength > 4 )
+			throw new AppException(ErrorCode.IMG_COUNT_LIMIT, ErrorCode.IMG_COUNT_LIMIT.getMessage());
 
 		if(dto != null){
 		if(myDisk.getMember().getMemberId() != member.getMemberId()) throw new AppException(ErrorCode.NOT_DISK_OWNER, ErrorCode.NOT_DISK_OWNER.getMessage());
 		if(dto.getDiskName() != null && dto.getDiskName().length() > 30) throw new AppException(ErrorCode.OVER_LONG_DISK_NAME, ErrorCode.OVER_LONG_DISK_NAME.getMessage());
 		if(dto.getContent() != null && dto.getContent().length() > 300) throw new AppException(ErrorCode.OVER_LONG_CONTENT, ErrorCode.OVER_LONG_CONTENT.getMessage());
 		}
+		if(files != null && files.length > 4) throw new AppException(ErrorCode.IMG_COUNT_LIMIT, ErrorCode.IMG_COUNT_LIMIT.getMessage());
 
 		if (bookmarkedDiskList.size() >= 3 && bookmarkedDiskList.stream().noneMatch(bookmarkedDisk -> bookmarkedDisk.getDiskId().equals(myDisk.getDiskId())))
 			throw new AppException(ErrorCode.BOOKMARK_DISK_LIMIT, ErrorCode.BOOKMARK_DISK_LIMIT.getMessage());
 		
 		//이미지 처리
-		if(dto.getDeleteImgList().length > 0) for(Long imgId : dto.getDeleteImgList()) imgRepository.deleteById(imgId);
-
 		List<DiskImgEntity> images = myDisk.getDiskImgList();
 		if (files != null) {
 			for (MultipartFile file : files) {
@@ -239,6 +251,9 @@ public class DiskService {
 				}
 			}
 		}
+
+		if(dto.getDeleteImgList() != null && dto.getDeleteImgList().length > 0)
+			for(Long imgId : dto.getDeleteImgList()) imgRepository.deleteById(imgId);
 
 		myDisk.setDiskImgList(images);
 
