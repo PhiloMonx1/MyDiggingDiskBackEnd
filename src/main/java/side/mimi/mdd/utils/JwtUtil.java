@@ -63,9 +63,7 @@ public class JwtUtil {
 	}
 
 	public static DecodedJWT decodedToken(String token){
-		if(token.startsWith("Bearer ")){
-			token = token.split(" ")[1];
-		}
+		if(token.startsWith("Bearer ")) token = token.split(" ")[1];
 
 		try {
 			return JWT.require(Algorithm.HMAC256(secretKey))
@@ -80,6 +78,8 @@ public class JwtUtil {
 		}
 	}
 	public static Long verifyRefreshToken(String refreshToken) {
+		if(refreshToken.startsWith("Bearer ")) refreshToken = refreshToken.split(" ")[1];
+
 		try {
 			return JWT.require(Algorithm.HMAC256(refreshKey))
 					.build()
