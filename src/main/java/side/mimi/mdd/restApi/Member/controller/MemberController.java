@@ -1,5 +1,6 @@
 package side.mimi.mdd.restApi.Member.controller;
 
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -56,16 +57,16 @@ public class MemberController {
 	 * 회원가입
 	 */
 	@PostMapping("/join")
-	public ResponseEntity<MemberTokenResponseDto> join(@RequestBody MemberJoinRequestDto dto){
-		return ResponseEntity.ok().body(memberService.join(dto));
+	public ResponseEntity<MemberTokenResponseDto> join(@RequestBody MemberJoinRequestDto dto, HttpServletResponse response){
+		return ResponseEntity.ok().body(memberService.join(dto, response));
 	}
 
 	/**
 	 * 로그인
 	 */
 	@PostMapping("/login")
-	public ResponseEntity<MemberTokenResponseDto> login(@RequestBody MemberLoginRequestDto dto){
-		return ResponseEntity.ok().body(memberService.login(dto));
+	public ResponseEntity<MemberTokenResponseDto> login(@RequestBody MemberLoginRequestDto dto,  HttpServletResponse response){
+		return ResponseEntity.ok().body(memberService.login(dto, response));
 	}
 
 	/**

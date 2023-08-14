@@ -1,9 +1,11 @@
 package side.mimi.mdd.restApi.Member.service;
 
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpHeaders;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -113,10 +115,9 @@ public class MemberService {
 	/**
 	 * 회원가입
 	 */
-	public MemberTokenResponseDto join(MemberJoinRequestDto dto){
+	public MemberTokenResponseDto join(MemberJoinRequestDto dto, HttpServletResponse response){
 		//TODO : 디스크 생성까지 같이 받을지에 대한 논의
 		//TODO : 최소 글자 수 및 빈값에 대한 예외처리
-		//TODO : 토큰 헤더에 담기
 		if(dto.getMemberName().isEmpty() || dto.getPassword().isEmpty()) throw new AppException(ErrorCode.EMPTY_JOIN_REQUEST, ErrorCode.EMPTY_JOIN_REQUEST.getMessage());
 		String memberName = dto.getMemberName().toLowerCase();
 		String nickname = generator.getRandomNickname();
@@ -157,15 +158,19 @@ public class MemberService {
 				.modifiedAt(member.getModifiedAt())
 				.build();
 
+		String accessToken = JwtUtil.createAccessToken(member.getMemberName());
 		String refreshToken = JwtUtil.createRefreshToken(member.getMemberId());
 		tokenRepository.save(TokenEntity.builder()
 						.memberId(member.getMemberId())
 						.token(refreshToken)
 				.build());
 
+		response.setHeader("accessToken", accessToken);
+		response.setHeader("refreshToken", refreshToken);
+
 		return  MemberTokenResponseDto.builder()
 				.memberInfo(memberResponseDto)
-				.accessToken(JwtUtil.createAccessToken(member.getMemberName()))
+				.accessToken(accessToken)
 				.refreshToken(refreshToken)
 				.build();
 	}
@@ -173,7 +178,7 @@ public class MemberService {
 	/**
 	 * 로그인
 	 */
-	public MemberTokenResponseDto login(MemberLoginRequestDto dto) {
+	public MemberTokenResponseDto login(MemberLoginRequestDto dto,  HttpServletResponse response) {
 		MemberEntity selectedMember = memberRepository.findByMemberName(dto.getMemberName().toLowerCase())
 				.orElseThrow(() ->new AppException(ErrorCode.MEMBER_NAME_NOT_FOUND, ErrorCode.MEMBER_NAME_NOT_FOUND.getMessage()));
 
@@ -214,15 +219,19 @@ public class MemberService {
 				.modifiedAt(selectedMember.getModifiedAt())
 				.build();
 
+		String accessToken = JwtUtil.createAccessToken(selectedMember.getMemberName());
 		String refreshToken = JwtUtil.createRefreshToken(selectedMember.getMemberId());
 		tokenRepository.save(TokenEntity.builder()
 				.memberId(selectedMember.getMemberId())
 				.token(refreshToken)
 				.build());
 
+		response.setHeader("accessToken", accessToken);
+		response.setHeader("refreshToken", refreshToken);
+
 		return  MemberTokenResponseDto.builder()
 				.memberInfo(memberResponseDto)
-				.accessToken(JwtUtil.createAccessToken(selectedMember.getMemberName()))
+				.accessToken(accessToken)
 				.refreshToken(refreshToken)
 				.build();
 	}
