@@ -316,6 +316,7 @@ public class MemberService {
 				.build();
 
 		String accessToken = JwtUtil.createAccessToken(member.getMemberName());
+		if(refreshToken.startsWith("Bearer ")) refreshToken = refreshToken.split(" ")[1];
 
 		response.setHeader("accessToken", accessToken);
 		response.setHeader("refreshToken", refreshToken);
