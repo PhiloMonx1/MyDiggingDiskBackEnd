@@ -30,8 +30,8 @@ public enum ErrorCode {
 	WRONG_INTRODUCE_VALID(HttpStatus.BAD_REQUEST, "introduce는 30자를 초과할 수 없습니다."),
 	//로그인 (Login)
 	MEMBER_NAME_NOT_FOUND(HttpStatus.NOT_FOUND, "찾을 수 없는 memberName 입니다."),
-	INVALID_PASSWORD(HttpStatus.BAD_REQUEST, "비밀번호가 일치하지 않습니다."),
-	OVER_INVALID_PASSWORD(HttpStatus.BAD_REQUEST, "너무 많은 로그인 시도를 했습니다. 잠시 후 다시 시도해주세요."),
+	INVALID_PASSWORD(HttpStatus.CONFLICT, "비밀번호가 일치하지 않습니다."),
+	OVER_INVALID_PASSWORD(HttpStatus.TOO_MANY_REQUESTS, "너무 많은 로그인 시도를 했습니다. 잠시 후 다시 시도해주세요."),
 	/**
 	 * DiskService 관련 에러코드
 	 */
@@ -41,7 +41,7 @@ public enum ErrorCode {
 	//조회
 	NOT_FOUND_DISK(HttpStatus.NOT_FOUND, "해당 DiskId를 가진 Disk를 찾을 수 없습니다."),
 	//수정, 삭제
-	NOT_DISK_OWNER(HttpStatus.UNAUTHORIZED, "Disk 소유자만 수정 및 삭제 권한이 주어집니다."),
+	NOT_DISK_OWNER(HttpStatus.FORBIDDEN, "Disk 소유자만 수정 및 삭제 권한이 주어집니다."),
 	//대표 디스크 (북마크, favorite)
 	BOOKMARK_DISK_LIMIT(HttpStatus.BAD_REQUEST, "대표디스크는 3개 까지 설정 가능합니다."),
 	//이미지
