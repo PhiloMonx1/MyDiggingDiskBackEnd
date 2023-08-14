@@ -291,7 +291,7 @@ public class MemberService {
 	/**
 	 * 토큰 재발급
 	 */
-	public MemberTokenResponseDto reissueToken(String refreshToken) {
+	public MemberTokenResponseDto reissueToken(String refreshToken, HttpServletResponse response) {
 		Long memberId = JwtUtil.verifyRefreshToken(refreshToken);
 		TokenEntity token = tokenRepository.findById(memberId)
 				.orElseThrow(()-> new AppException(ErrorCode.BLACKLIST_TOKEN, ErrorCode.BLACKLIST_TOKEN.getMessage()));
@@ -315,9 +315,14 @@ public class MemberService {
 				.modifiedAt(member.getModifiedAt())
 				.build();
 
+		String accessToken = JwtUtil.createAccessToken(member.getMemberName());
+
+		response.setHeader("accessToken", accessToken);
+		response.setHeader("refreshToken", refreshToken);
+
 		return MemberTokenResponseDto.builder()
 				.memberInfo(memberResponseDto)
-				.accessToken(JwtUtil.createAccessToken(member.getMemberName()))
+				.accessToken(accessToken)
 				.refreshToken(refreshToken)
 				.build();
 	}

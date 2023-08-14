@@ -91,8 +91,8 @@ public class MemberController {
 	 * 토큰 재발급
 	 */
 	@GetMapping("/reissue")
-	public ResponseEntity<MemberTokenResponseDto> reissueToken(@RequestBody String refreshToken){
-		return ResponseEntity.ok().body(memberService.reissueToken(refreshToken));
+	public ResponseEntity<MemberTokenResponseDto> reissueToken(@RequestBody String refreshToken, HttpServletResponse response){
+		return ResponseEntity.ok().body(memberService.reissueToken(refreshToken, response));
 	}
 
 }
