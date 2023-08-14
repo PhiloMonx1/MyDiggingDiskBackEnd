@@ -39,21 +39,42 @@ public class DiskService {
 		MemberEntity member = memberService.getMemberByJwt(token);
 		List<DiskEntity> myDisks = diskRepository.findAllByMemberMemberId(member.getMemberId());
 
-		return myDisks.stream().map(disk -> DiskResponseDto.builder()
-						.diskId(disk.getDiskId())
-						.diskName(disk.getDiskName())
-						.content(disk.getContent())
-						.diskColor(disk.getDiskColor())
-						.isPrivate(disk.isPrivate())
-						.isBookmark(disk.getIsBookmark() != null)
-						.likeCount(disk.getLikeCount())
-						.diskOwnerId(disk.getMember().getMemberId())
-						.diskOwnerNickname(disk.getMember().getNickname())
-						.isMine(true)
-						.createdAt(disk.getCreatedAt())
-						.modifiedAt(disk.getModifiedAt())
-						.build())
-				.collect(Collectors.toList());
+		List<DiskResponseDto> responseDtoList = new ArrayList<>();
+
+		for(DiskEntity myDisk : myDisks) {
+			List<DiskImgDto> imageDtoList = new ArrayList<>();
+
+			for (DiskImgEntity image : myDisk.getDiskImgList()) {
+				DiskImgDto diskImgDto = DiskImgDto.builder()
+						.imgId(image.getImgId())
+						.imgUrl(image.getImgUrl())
+						.createdAt(image.getCreatedAt())
+						.modifiedAt(image.getModifiedAt())
+						.build();
+
+				imageDtoList.add(diskImgDto);
+			}
+
+			DiskResponseDto responseDto = DiskResponseDto.builder()
+					.diskId(myDisk.getDiskId())
+					.diskName(myDisk.getDiskName())
+					.content(myDisk.getContent())
+					.diskColor(myDisk.getDiskColor())
+					.isPrivate(myDisk.isPrivate())
+					.isBookmark(myDisk.getIsBookmark() != null)
+					.likeCount(myDisk.getLikeCount())
+					.diskOwnerId(myDisk.getMember().getMemberId())
+					.diskOwnerNickname(myDisk.getMember().getNickname())
+					.isMine(true)
+					.image(imageDtoList)
+					.createdAt(myDisk.getCreatedAt())
+					.modifiedAt(myDisk.getModifiedAt())
+					.build();
+
+			responseDtoList.add(responseDto);
+		}
+
+		return responseDtoList;
 	}
 
 	/**
@@ -64,6 +85,19 @@ public class DiskService {
 
 		DiskEntity disk = diskRepository.findById(diskId)
 				.orElseThrow(() ->new AppException(ErrorCode.NOT_FOUND_DISK, ErrorCode.NOT_FOUND_DISK.getMessage()));
+
+		List<DiskImgDto> imageDtoList = new ArrayList<>();
+
+		for (DiskImgEntity image : disk.getDiskImgList()){
+			DiskImgDto diskImgDto = DiskImgDto.builder()
+					.imgId(image.getImgId())
+					.imgUrl(image.getImgUrl())
+					.createdAt(image.getCreatedAt())
+					.modifiedAt(image.getModifiedAt())
+					.build();
+
+			imageDtoList.add(diskImgDto);
+		}
 
 		return DiskResponseDto.builder()
 				.diskId(disk.getDiskId())
@@ -76,6 +110,7 @@ public class DiskService {
 				.diskOwnerId(disk.getMember().getMemberId())
 				.diskOwnerNickname(disk.getMember().getNickname())
 				.isMine(member != null && disk.getMember().getMemberId() == member.getMemberId())
+				.image(imageDtoList)
 				.createdAt(disk.getCreatedAt())
 				.modifiedAt(disk.getModifiedAt())
 				.build();
