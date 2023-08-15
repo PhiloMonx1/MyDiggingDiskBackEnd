@@ -242,7 +242,7 @@ public class MemberService {
 	 */
 	public MemberResponseDto modifyMemberInfo(MemberModifyRequestDto dto, String token, MultipartFile file) throws IOException {
 		if(dto != null){
-			if(dto.getNickname() != null && dto.getNickname().length() > 10) throw new AppException(ErrorCode.WRONG_NICKNAME_VALID, ErrorCode.WRONG_NICKNAME_VALID.getMessage());
+			if(dto.getNickname() != null && dto.getNickname().replaceAll(" ", "").length() > 10) throw new AppException(ErrorCode.WRONG_NICKNAME_VALID, ErrorCode.WRONG_NICKNAME_VALID.getMessage());
 			if(dto.getInterest() != null && dto.getInterest().length() > 10) throw new AppException(ErrorCode.WRONG_INTEREST_VALID, ErrorCode.WRONG_INTEREST_VALID.getMessage());
 			if(dto.getIntroduce() != null && dto.getIntroduce().length() > 30) throw new AppException(ErrorCode.WRONG_INTRODUCE_VALID, ErrorCode.WRONG_INTRODUCE_VALID.getMessage());
 		}
@@ -262,7 +262,7 @@ public class MemberService {
 		if(dto.getIsDefault() != null && dto.getIsDefault() ) profileImg = "";
 
 		if(dto != null && dto.getNickname() != null && !member.getNickname().equals(dto.getNickname())){
-			memberRepository.findByNickname(dto.getNickname())
+			memberRepository.findByNickname(dto.getNickname().replaceAll(" ", ""))
 					.ifPresent(memberEntity -> {throw new AppException(ErrorCode.MEMBER_NICKNAME_DUPLICATED, ErrorCode.MEMBER_NICKNAME_DUPLICATED.getMessage());});
 		}
 
