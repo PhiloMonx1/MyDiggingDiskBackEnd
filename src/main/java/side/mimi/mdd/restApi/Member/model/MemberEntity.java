@@ -54,8 +54,8 @@ public class MemberEntity extends BaseEntity {
 
 	public void modifyMemberInfo(MemberModifyRequestDto dto, String profileImg){
 		if(dto.getNickname() != null && !dto.getNickname().isEmpty()) nickname = dto.getNickname().replaceAll(" ", "");
-		if(dto.getInterest() != null && !dto.getInterest().isEmpty()) interest = dto.getInterest();
-		if(dto.getIntroduce() != null && !dto.getIntroduce().isEmpty()) introduce = dto.getIntroduce();
+		if(dto.getInterest() != null) interest = dto.getInterest();
+		if(dto.getIntroduce() != null) introduce = dto.getIntroduce();
 		this.profileImg = profileImg;
 	}
 	public void viewCntIncrease(){
