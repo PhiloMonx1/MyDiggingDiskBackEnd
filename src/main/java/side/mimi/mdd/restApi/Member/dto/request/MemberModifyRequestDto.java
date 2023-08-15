@@ -9,4 +9,5 @@ public class MemberModifyRequestDto {
 	private String nickname;
 	private String interest;
 	private String introduce;
+	private Boolean isDefault;
 }

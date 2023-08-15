@@ -254,7 +254,12 @@ public class MemberService {
 
 		if(file != null){
 			profileImg = s3Util.uploadFile(file);
+			if(profileImg == null){
+				profileImg = member.getProfileImg();
+			}
 		}
+
+		if(dto.getIsDefault() != null && dto.getIsDefault() ) profileImg = "";
 
 		if(dto != null && dto.getNickname() != null && !member.getNickname().equals(dto.getNickname())){
 			memberRepository.findByNickname(dto.getNickname())
