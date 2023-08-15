@@ -36,7 +36,7 @@ public class DiskService {
 	public List<DiskResponseDto> getMyDisks(String token) {
 		//TODO : 오버패칭 유지할 것인지에 대한 판단 필요
 		MemberEntity member = memberService.getMemberByJwt(token);
-		List<DiskEntity> myDisks = diskRepository.findAllByMemberMemberId(member.getMemberId());
+		List<DiskEntity> myDisks = diskRepository.findAllByMemberMemberIdOrderByIsBookmarkDesc(member.getMemberId());
 
 		List<DiskResponseDto> responseDtoList = new ArrayList<>();
 
@@ -126,7 +126,7 @@ public class DiskService {
 	 */
 	public List<DiskResponseDto> getDisksByMemberId(Long memberId, String token) {
 		MemberEntity member = memberService.getMemberByJwt(token);
-		List<DiskEntity> DisksByMemberId = diskRepository.findAllByMemberMemberId(memberId);
+		List<DiskEntity> DisksByMemberId = diskRepository.findAllByMemberMemberIdOrderByIsBookmarkDesc(memberId);
 
 		List<DiskResponseDto> responseDtoList = new ArrayList<>();
 

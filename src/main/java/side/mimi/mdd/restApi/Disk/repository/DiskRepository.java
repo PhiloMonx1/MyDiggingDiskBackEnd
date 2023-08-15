@@ -7,7 +7,7 @@ import side.mimi.mdd.restApi.Disk.model.DiskEntity;
 import java.util.List;
 
 public interface DiskRepository extends JpaRepository<DiskEntity, Long> {
-	List<DiskEntity> findAllByMemberMemberId(Long memberId);
+	List<DiskEntity> findAllByMemberMemberIdOrderByIsBookmarkDesc(Long memberId);
 	List<DiskEntity> findAllByMemberMemberIdAndIsBookmarkNotNullOrderByIsBookmarkDesc(Long memberId);
 	@Query("SELECT SUM(d.likeCount) FROM DiskEntity d WHERE d.member.memberId = :memberId")
 	Integer getTotalLikesByMemberId(Long memberId);
