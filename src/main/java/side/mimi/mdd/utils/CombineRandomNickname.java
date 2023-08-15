@@ -62,6 +62,6 @@ public class CombineRandomNickname {
 		int adjIndex = random.nextInt(adjectives.length);
 		int nounIndex = random.nextInt(nouns.length);
 
-		return adjectives[adjIndex] + " " + nouns[nounIndex];
+		return adjectives[adjIndex] + nouns[nounIndex];
 	}
 }

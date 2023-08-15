@@ -102,14 +102,14 @@ public class MemberService {
 	 * 회원 계정 (memberName) 중복체크
 	 */
 	public boolean checkMemberName(String memberName) {
-		return memberRepository.findByMemberName(memberName.toLowerCase()).isEmpty();
+		return memberRepository.findByMemberName(memberName.toLowerCase().replaceAll(" ", "")).isEmpty();
 	}
 
 	/**
 	 * 닉네임 중복체크
 	 */
 	public boolean checkNickname(String nickname) {
-		return memberRepository.findByNickname(nickname).isEmpty();
+		return memberRepository.findByNickname(nickname.replaceAll(" ", "")).isEmpty();
 	}
 
 	/**
@@ -119,7 +119,7 @@ public class MemberService {
 		//TODO : 디스크 생성까지 같이 받을지에 대한 논의
 		//TODO : 최소 글자 수 및 빈값에 대한 예외처리
 		if(dto.getMemberName().isEmpty() || dto.getPassword().isEmpty()) throw new AppException(ErrorCode.EMPTY_JOIN_REQUEST, ErrorCode.EMPTY_JOIN_REQUEST.getMessage());
-		String memberName = dto.getMemberName().toLowerCase();
+		String memberName = dto.getMemberName().toLowerCase().replaceAll(" ", "");
 		String nickname = generator.getRandomNickname();
 
 		if(memberName.length() > 20 || !RegexUtils.isAlphanumeric(memberName))
@@ -242,7 +242,7 @@ public class MemberService {
 	 */
 	public MemberResponseDto modifyMemberInfo(MemberModifyRequestDto dto, String token, MultipartFile file) throws IOException {
 		if(dto != null){
-			if(dto.getNickname() != null && dto.getNickname().length() > 10) throw new AppException(ErrorCode.WRONG_NICKNAME_VALID, ErrorCode.WRONG_NICKNAME_VALID.getMessage());
+			if(dto.getNickname() != null && dto.getNickname().replaceAll(" ", "").length() > 10) throw new AppException(ErrorCode.WRONG_NICKNAME_VALID, ErrorCode.WRONG_NICKNAME_VALID.getMessage());
 			if(dto.getInterest() != null && dto.getInterest().length() > 10) throw new AppException(ErrorCode.WRONG_INTEREST_VALID, ErrorCode.WRONG_INTEREST_VALID.getMessage());
 			if(dto.getIntroduce() != null && dto.getIntroduce().length() > 30) throw new AppException(ErrorCode.WRONG_INTRODUCE_VALID, ErrorCode.WRONG_INTRODUCE_VALID.getMessage());
 		}
@@ -254,10 +254,15 @@ public class MemberService {
 
 		if(file != null){
 			profileImg = s3Util.uploadFile(file);
+			if(profileImg == null){
+				profileImg = member.getProfileImg();
+			}
 		}
 
+		if(dto.getIsDefault() != null && dto.getIsDefault() ) profileImg = "";
+
 		if(dto != null && dto.getNickname() != null && !member.getNickname().equals(dto.getNickname())){
-			memberRepository.findByNickname(dto.getNickname())
+			memberRepository.findByNickname(dto.getNickname().replaceAll(" ", ""))
 					.ifPresent(memberEntity -> {throw new AppException(ErrorCode.MEMBER_NICKNAME_DUPLICATED, ErrorCode.MEMBER_NICKNAME_DUPLICATED.getMessage());});
 		}
 

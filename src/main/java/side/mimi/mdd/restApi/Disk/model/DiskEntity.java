@@ -58,7 +58,7 @@ public class DiskEntity extends BaseEntity {
 
 	public void modifyDisk(DiskModifyRequestDto dto){
 		if(dto.getDiskName() != null && !dto.getDiskName().isEmpty()) diskName = dto.getDiskName();
-		if(dto.getContent() != null && !dto.getContent().isEmpty()) content = dto.getContent();
+		if(dto.getContent() != null) content = dto.getContent();
 		if(dto.getDiskColor() != null) diskColor = dto.getDiskColor();
 		if(dto.getIsPrivate() != null) isPrivate = dto.getIsPrivate();
 		if(dto.getIsBookmark() != null && dto.getIsBookmark()) isBookmark = LocalDateTime.now();

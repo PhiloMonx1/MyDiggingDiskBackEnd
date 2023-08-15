@@ -53,9 +53,9 @@ public class MemberEntity extends BaseEntity {
 	private List<DiskEntity> diskList = new ArrayList<>();
 
 	public void modifyMemberInfo(MemberModifyRequestDto dto, String profileImg){
-		if(dto.getNickname() != null && !dto.getNickname().isEmpty()) nickname = dto.getNickname();
-		if(dto.getInterest() != null && !dto.getInterest().isEmpty()) interest = dto.getInterest();
-		if(dto.getIntroduce() != null && !dto.getIntroduce().isEmpty()) introduce = dto.getIntroduce();
+		if(dto.getNickname() != null && !dto.getNickname().isEmpty()) nickname = dto.getNickname().replaceAll(" ", "");
+		if(dto.getInterest() != null) interest = dto.getInterest();
+		if(dto.getIntroduce() != null) introduce = dto.getIntroduce();
 		this.profileImg = profileImg;
 	}
 	public void viewCntIncrease(){

@@ -27,7 +27,7 @@ public class S3Util {
 	private String bucketName;
 
 	public String uploadFile(MultipartFile file) throws IOException {
-		if(file.getOriginalFilename().equals("")) return "";
+		if(file.getOriginalFilename().equals("")) return null;
 
 		String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
 		String fileExtension = fileName.substring(fileName.lastIndexOf(".") + 1).toLowerCase();
