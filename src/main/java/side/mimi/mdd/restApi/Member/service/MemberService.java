@@ -102,14 +102,14 @@ public class MemberService {
 	 * 회원 계정 (memberName) 중복체크
 	 */
 	public boolean checkMemberName(String memberName) {
-		return memberRepository.findByMemberName(memberName.toLowerCase()).isEmpty();
+		return memberRepository.findByMemberName(memberName.toLowerCase().replaceAll(" ", "")).isEmpty();
 	}
 
 	/**
 	 * 닉네임 중복체크
 	 */
 	public boolean checkNickname(String nickname) {
-		return memberRepository.findByNickname(nickname).isEmpty();
+		return memberRepository.findByNickname(nickname.replaceAll(" ", "")).isEmpty();
 	}
 
 	/**
