@@ -119,7 +119,7 @@ public class MemberService {
 		//TODO : 디스크 생성까지 같이 받을지에 대한 논의
 		//TODO : 최소 글자 수 및 빈값에 대한 예외처리
 		if(dto.getMemberName().isEmpty() || dto.getPassword().isEmpty()) throw new AppException(ErrorCode.EMPTY_JOIN_REQUEST, ErrorCode.EMPTY_JOIN_REQUEST.getMessage());
-		String memberName = dto.getMemberName().toLowerCase();
+		String memberName = dto.getMemberName().toLowerCase().replaceAll(" ", "");
 		String nickname = generator.getRandomNickname();
 
 		if(memberName.length() > 20 || !RegexUtils.isAlphanumeric(memberName))
