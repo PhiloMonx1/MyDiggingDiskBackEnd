@@ -381,47 +381,4 @@ public class MemberService {
 		if (totalLikes == null) return 0;
 		return totalLikes;
 	}
-
-	public MemberTokenResponseDto testToken(HttpServletResponse response) {
-		MemberEntity testMember = MemberEntity.builder()
-				.memberName("testMember".toLowerCase())
-				.nickname("양파쿵야")
-				.password(encoder.encode("123456"))
-				.interest("샐러리쿵야랑놀기")
-				.introduce("나는야 귀여운 양파쿵야 모두 나를 따르라~ 우하하^^")
-				.profileImg("https://i.namu.wiki/i/y7qTOOIL6nIa2cXybk511OASqwAGMgZiNjh6CtErz0ust7MPJaztzSYiypYevehQOjdJc-TQvTctUk7N629V7A.webp")
-				.visitCount(0)
-				.build();
-		memberRepository.save(testMember);
-
-		MemberResponseDto memberResponseDto = MemberResponseDto.builder()
-				.memberId(testMember.getMemberId())
-				.memberName(testMember.getMemberName())
-				.nickname(testMember.getNickname())
-				.interest(testMember.getInterest())
-				.introduce(testMember.getIntroduce())
-				.visitCount(testMember.getVisitCount())
-				.likeCount(0)
-				.profileImg(testMember.getProfileImg())
-				.isMe(true)
-				.createdAt(testMember.getCreatedAt())
-				.modifiedAt(testMember.getModifiedAt())
-				.build();
-
-		String accessToken = JwtUtil.createAccessToken(testMember.getMemberName());
-		String refreshToken = JwtUtil.createRefreshToken(testMember.getMemberName(), testMember.getMemberId());
-		tokenRepository.save(TokenEntity.builder()
-				.memberId(testMember.getMemberId())
-				.token("Bearer " + refreshToken)
-				.build());
-
-		response.setHeader("accessToken", accessToken);
-		response.setHeader("refreshToken", refreshToken);
-
-		return  MemberTokenResponseDto.builder()
-				.memberInfo(memberResponseDto)
-				.accessToken(accessToken)
-				.refreshToken(refreshToken)
-				.build();
-	}
 }

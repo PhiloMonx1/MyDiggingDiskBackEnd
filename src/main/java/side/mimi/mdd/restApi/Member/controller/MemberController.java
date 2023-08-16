@@ -102,9 +102,4 @@ public class MemberController {
 	public ResponseEntity<Integer> likeMember(@PathVariable Long memberId){
 		return ResponseEntity.ok().body(memberService.likeMember(memberId));
 	}
-
-	@GetMapping("/test/token")
-	public ResponseEntity<MemberTokenResponseDto> testToken(HttpServletResponse response){
-		return ResponseEntity.ok().body(memberService.testToken(response));
-	}
 }

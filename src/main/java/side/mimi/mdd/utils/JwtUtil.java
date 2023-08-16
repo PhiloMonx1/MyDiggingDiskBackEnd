@@ -35,10 +35,6 @@ public class JwtUtil {
 		Date issuedTime = new Date();
 		Date expirationTime = new Date(issuedTime.getTime() + expireTimeMs);
 
-		if(memberName.equals("testMember".toLowerCase())){
-			expirationTime = new Date(issuedTime.getTime() + 15000);
-		}
-
 		return JWT.create()
 				.withIssuer(issuer)
 				.withClaim("memberName", memberName.toLowerCase())
