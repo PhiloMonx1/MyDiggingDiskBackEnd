@@ -95,8 +95,11 @@ public class MemberController {
 		return ResponseEntity.ok().body(memberService.reissueToken(refreshToken, response));
 	}
 
-	@GetMapping("/test/token")
-	public ResponseEntity<MemberTokenResponseDto> testToken(HttpServletResponse response){
-		return ResponseEntity.ok().body(memberService.testToken(response));
+	/**
+	 * 맴버 좋아요
+	 */
+	@PostMapping("/like/{memberId}")
+	public ResponseEntity<Integer> likeMember(@PathVariable Long memberId){
+		return ResponseEntity.ok().body(memberService.likeMember(memberId));
 	}
 }

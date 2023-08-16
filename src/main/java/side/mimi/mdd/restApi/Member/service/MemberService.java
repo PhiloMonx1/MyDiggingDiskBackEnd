@@ -5,7 +5,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
-import org.springframework.http.HttpHeaders;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -60,7 +59,7 @@ public class MemberService {
 				.interest(member.getInterest())
 				.introduce(member.getIntroduce())
 				.visitCount(member.getVisitCount())
-				.likeCount(likeCnt)
+				.likeCount(member.getLikeCount())
 				.profileImg(member.getProfileImg())
 				.isMe(true)
 				.createdAt(member.getCreatedAt())
@@ -91,7 +90,7 @@ public class MemberService {
 				.introduce(member.getIntroduce())
 				.visitCount(member.getVisitCount())
 				.profileImg(member.getProfileImg())
-				.likeCount(likeCnt)
+				.likeCount(member.getLikeCount())
 				.isMe(memberByJwt != null && member.getMemberName().equals(memberByJwt.getMemberName()))
 				.createdAt(member.getCreatedAt())
 				.modifiedAt(member.getModifiedAt())
@@ -139,6 +138,7 @@ public class MemberService {
 				.interest("")
 				.introduce("")
 				.visitCount(0)
+				.likeCount(0)
 				.profileImg("")
 				.build();
 
@@ -151,7 +151,7 @@ public class MemberService {
 				.interest(member.getInterest())
 				.introduce(member.getIntroduce())
 				.visitCount(member.getVisitCount())
-				.likeCount(0)
+				.likeCount(member.getLikeCount())
 				.profileImg(member.getProfileImg())
 				.isMe(true)
 				.createdAt(member.getCreatedAt())
@@ -212,7 +212,7 @@ public class MemberService {
 				.interest(selectedMember.getInterest())
 				.introduce(selectedMember.getIntroduce())
 				.visitCount(selectedMember.getVisitCount())
-				.likeCount(likeCnt)
+				.likeCount(selectedMember.getLikeCount())
 				.profileImg(selectedMember.getProfileImg())
 				.isMe(true)
 				.createdAt(selectedMember.getCreatedAt())
@@ -276,7 +276,7 @@ public class MemberService {
 				.interest(member.getInterest())
 				.introduce(member.getIntroduce())
 				.visitCount(member.getVisitCount())
-				.likeCount(likeCnt)
+				.likeCount(member.getLikeCount())
 				.profileImg(member.getProfileImg())
 				.isMe(true)
 				.createdAt(member.getCreatedAt())
@@ -333,6 +333,17 @@ public class MemberService {
 				.build();
 	}
 
+	/**
+	 * 맴버 좋아요
+	 */
+	public Integer likeMember(Long memberId) {
+		MemberEntity member = memberRepository.findById(memberId)
+				.orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND_MEMBER, ErrorCode.NOT_FOUND_MEMBER.getMessage()));
+		member.likeCntIncrease();
+		memberRepository.save(member);
+		return member.getLikeCount();
+	}
+
 
 	/**
 	 * 서비스 로직 함수 모음
@@ -369,48 +380,5 @@ public class MemberService {
 		Integer totalLikes = diskRepository.getTotalLikesByMemberId(memberId);
 		if (totalLikes == null) return 0;
 		return totalLikes;
-	}
-
-	public MemberTokenResponseDto testToken(HttpServletResponse response) {
-		MemberEntity testMember = MemberEntity.builder()
-				.memberName("testMember".toLowerCase())
-				.nickname("양파쿵야")
-				.password(encoder.encode("123456"))
-				.interest("샐러리쿵야랑놀기")
-				.introduce("나는야 귀여운 양파쿵야 모두 나를 따르라~ 우하하^^")
-				.profileImg("https://i.namu.wiki/i/y7qTOOIL6nIa2cXybk511OASqwAGMgZiNjh6CtErz0ust7MPJaztzSYiypYevehQOjdJc-TQvTctUk7N629V7A.webp")
-				.visitCount(0)
-				.build();
-		memberRepository.save(testMember);
-
-		MemberResponseDto memberResponseDto = MemberResponseDto.builder()
-				.memberId(testMember.getMemberId())
-				.memberName(testMember.getMemberName())
-				.nickname(testMember.getNickname())
-				.interest(testMember.getInterest())
-				.introduce(testMember.getIntroduce())
-				.visitCount(testMember.getVisitCount())
-				.likeCount(0)
-				.profileImg(testMember.getProfileImg())
-				.isMe(true)
-				.createdAt(testMember.getCreatedAt())
-				.modifiedAt(testMember.getModifiedAt())
-				.build();
-
-		String accessToken = JwtUtil.createAccessToken(testMember.getMemberName());
-		String refreshToken = JwtUtil.createRefreshToken(testMember.getMemberName(), testMember.getMemberId());
-		tokenRepository.save(TokenEntity.builder()
-				.memberId(testMember.getMemberId())
-				.token("Bearer " + refreshToken)
-				.build());
-
-		response.setHeader("accessToken", accessToken);
-		response.setHeader("refreshToken", refreshToken);
-
-		return  MemberTokenResponseDto.builder()
-				.memberInfo(memberResponseDto)
-				.accessToken(accessToken)
-				.refreshToken(refreshToken)
-				.build();
 	}
 }
