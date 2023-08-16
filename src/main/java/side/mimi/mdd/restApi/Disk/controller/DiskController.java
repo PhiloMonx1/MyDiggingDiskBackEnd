@@ -6,11 +6,11 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import side.mimi.mdd.restApi.Disk.dto.request.DiskModifyRequestDto;
 import side.mimi.mdd.restApi.Disk.dto.request.DiskPostRequestDto;
+import side.mimi.mdd.restApi.Disk.dto.response.DiskByMemberResponseDto;
 import side.mimi.mdd.restApi.Disk.dto.response.DiskResponseDto;
 import side.mimi.mdd.restApi.Disk.service.DiskService;
 
 import java.io.IOException;
-import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -22,7 +22,7 @@ public class DiskController {
 	 * 나의 디스크 모두 조회
 	 */
 	@GetMapping("/mydisks")
-	public ResponseEntity<List<DiskResponseDto>> getMyDisks(@RequestHeader(name="Authorization") String token){
+	public ResponseEntity<DiskByMemberResponseDto> getMyDisks(@RequestHeader(name="Authorization") String token){
 		return ResponseEntity.ok().body(diskService.getMyDisks(token));
 	}
 
@@ -30,7 +30,7 @@ public class DiskController {
 	 * 나의 대표 디스크 모두 조회
 	 */
 	@GetMapping("/mydisks/bookmarked")
-	public ResponseEntity<List<DiskResponseDto>> getMyBookmarkedDisks(@RequestHeader(name="Authorization") String token){
+	public ResponseEntity<DiskByMemberResponseDto> getMyBookmarkedDisks(@RequestHeader(name="Authorization") String token){
 		return ResponseEntity.ok().body(diskService.getMyBookmarkedDisks(token));
 	}
 
@@ -38,7 +38,7 @@ public class DiskController {
 	 * 특정 맴버의 디스크 모두 조회
 	 */
 	@GetMapping("/all/{memberId}")
-	public ResponseEntity<List<DiskResponseDto>> getDisksByMemberId(@PathVariable Long memberId, @RequestHeader(name="Authorization", required = false) String token){
+	public ResponseEntity<DiskByMemberResponseDto> getDisksByMemberId(@PathVariable Long memberId, @RequestHeader(name="Authorization", required = false) String token){
 		return ResponseEntity.ok().body(diskService.getDisksByMemberId(memberId, token));
 	}
 
@@ -46,7 +46,7 @@ public class DiskController {
 	 * 특정 맴버의 대표 디스크 모두 조회
 	 */
 	@GetMapping("/all/bookmarked/{memberId}")
-	public ResponseEntity<List<DiskResponseDto>> getBookmarkedDisksByMemberId(@PathVariable Long memberId, @RequestHeader(name="Authorization", required = false) String token){
+	public ResponseEntity<DiskByMemberResponseDto> getBookmarkedDisksByMemberId(@PathVariable Long memberId, @RequestHeader(name="Authorization", required = false) String token){
 		return ResponseEntity.ok().body(diskService.getBookmarkedDisksByMemberId(memberId, token));
 	}
 
