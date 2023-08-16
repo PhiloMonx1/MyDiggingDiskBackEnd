@@ -45,6 +45,9 @@ public class MemberEntity extends BaseEntity {
 	@Column(name = "VISIT_COUNT")
 	private Integer visitCount;
 
+	@Column(name = "LIKE_COUNT")
+	private Integer likeCount;
+
 	@Column(name = "PROFILE_IMG")
 	private String profileImg;
 
@@ -60,5 +63,8 @@ public class MemberEntity extends BaseEntity {
 	}
 	public void viewCntIncrease(){
 		visitCount++;
+	}
+	public void likeCntIncrease(){
+		likeCount++;
 	}
 }

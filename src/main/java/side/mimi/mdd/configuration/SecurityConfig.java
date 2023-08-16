@@ -55,6 +55,7 @@ public class SecurityConfig {
 						.requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.GET,"/api/v1/members/{memberId}")).permitAll()
 						.requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.GET,"/api/v1/members/check/{memberName}")).permitAll()
 						.requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.GET,"/api/v1/members/check/nick/{nickname}")).permitAll()
+						.requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.POST,"/api/v1/members/like/{memberId}")).permitAll()
 						//DISK API.
 						.requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.GET,"/api/v1/disks/{diskId}")).permitAll()
 						.requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.GET,"/api/v1/disks/all/{memberId}")).permitAll()

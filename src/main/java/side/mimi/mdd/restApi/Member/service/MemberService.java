@@ -5,7 +5,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
-import org.springframework.http.HttpHeaders;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -60,7 +59,7 @@ public class MemberService {
 				.interest(member.getInterest())
 				.introduce(member.getIntroduce())
 				.visitCount(member.getVisitCount())
-				.likeCount(likeCnt)
+				.likeCount(member.getLikeCount())
 				.profileImg(member.getProfileImg())
 				.isMe(true)
 				.createdAt(member.getCreatedAt())
@@ -91,7 +90,7 @@ public class MemberService {
 				.introduce(member.getIntroduce())
 				.visitCount(member.getVisitCount())
 				.profileImg(member.getProfileImg())
-				.likeCount(likeCnt)
+				.likeCount(member.getLikeCount())
 				.isMe(memberByJwt != null && member.getMemberName().equals(memberByJwt.getMemberName()))
 				.createdAt(member.getCreatedAt())
 				.modifiedAt(member.getModifiedAt())
@@ -139,6 +138,7 @@ public class MemberService {
 				.interest("")
 				.introduce("")
 				.visitCount(0)
+				.likeCount(0)
 				.profileImg("")
 				.build();
 
@@ -151,7 +151,7 @@ public class MemberService {
 				.interest(member.getInterest())
 				.introduce(member.getIntroduce())
 				.visitCount(member.getVisitCount())
-				.likeCount(0)
+				.likeCount(member.getLikeCount())
 				.profileImg(member.getProfileImg())
 				.isMe(true)
 				.createdAt(member.getCreatedAt())
@@ -212,7 +212,7 @@ public class MemberService {
 				.interest(selectedMember.getInterest())
 				.introduce(selectedMember.getIntroduce())
 				.visitCount(selectedMember.getVisitCount())
-				.likeCount(likeCnt)
+				.likeCount(selectedMember.getLikeCount())
 				.profileImg(selectedMember.getProfileImg())
 				.isMe(true)
 				.createdAt(selectedMember.getCreatedAt())
@@ -276,7 +276,7 @@ public class MemberService {
 				.interest(member.getInterest())
 				.introduce(member.getIntroduce())
 				.visitCount(member.getVisitCount())
-				.likeCount(likeCnt)
+				.likeCount(member.getLikeCount())
 				.profileImg(member.getProfileImg())
 				.isMe(true)
 				.createdAt(member.getCreatedAt())
@@ -331,6 +331,17 @@ public class MemberService {
 				.accessToken(accessToken)
 				.refreshToken(refreshToken)
 				.build();
+	}
+
+	/**
+	 * 맴버 좋아요
+	 */
+	public Integer likeMember(Long memberId) {
+		MemberEntity member = memberRepository.findById(memberId)
+				.orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND_MEMBER, ErrorCode.NOT_FOUND_MEMBER.getMessage()));
+		member.likeCntIncrease();
+		memberRepository.save(member);
+		return member.getLikeCount();
 	}
 
 
