@@ -8,12 +8,14 @@ import side.mimi.mdd.exception.ErrorCode;
 import side.mimi.mdd.restApi.Disk.dto.DiskImgDto;
 import side.mimi.mdd.restApi.Disk.dto.request.DiskModifyRequestDto;
 import side.mimi.mdd.restApi.Disk.dto.request.DiskPostRequestDto;
+import side.mimi.mdd.restApi.Disk.dto.response.DiskByMemberResponseDto;
 import side.mimi.mdd.restApi.Disk.dto.response.DiskResponseDto;
 import side.mimi.mdd.restApi.Disk.model.DiskEntity;
 import side.mimi.mdd.restApi.Disk.model.DiskImgEntity;
 import side.mimi.mdd.restApi.Disk.repository.DiskImgRepository;
 import side.mimi.mdd.restApi.Disk.repository.DiskRepository;
 import side.mimi.mdd.restApi.Member.model.MemberEntity;
+import side.mimi.mdd.restApi.Member.repository.MemberRepository;
 import side.mimi.mdd.restApi.Member.service.MemberService;
 import side.mimi.mdd.utils.S3Util;
 
@@ -29,11 +31,12 @@ public class DiskService {
 	private final MemberService memberService;
 	private final S3Util s3Util;
 	private final DiskImgRepository imgRepository;
+	private final MemberRepository memberRepository;
 
 	/**
 	 * 나의 디스크 모두 조회
 	 */
-	public List<DiskResponseDto> getMyDisks(String token) {
+	public DiskByMemberResponseDto getMyDisks(String token) {
 		//TODO : 오버패칭 유지할 것인지에 대한 판단 필요
 		MemberEntity member = memberService.getMemberByJwt(token);
 		List<DiskEntity> myDisks = diskRepository.findAllByMemberMemberIdOrderByIsBookmarkDesc(member.getMemberId());
@@ -73,13 +76,19 @@ public class DiskService {
 			responseDtoList.add(responseDto);
 		}
 
-		return responseDtoList;
+		return DiskByMemberResponseDto.builder()
+				.memberId(member.getMemberId())
+				.memberName(member.getMemberName())
+				.nickname(member.getNickname())
+				.isMine(true)
+				.diskList(responseDtoList)
+				.build();
 	}
 
 	/**
 	 * 나의 대표 디스크 모두 조회
 	 */
-	public List<DiskResponseDto> getMyBookmarkedDisks(String token) {
+	public DiskByMemberResponseDto getMyBookmarkedDisks(String token) {
 		MemberEntity member = memberService.getMemberByJwt(token);
 		List<DiskEntity> myDisks = diskRepository.findAllByMemberMemberIdAndIsBookmarkNotNullOrderByIsBookmarkDesc(member.getMemberId());
 
@@ -118,14 +127,23 @@ public class DiskService {
 			responseDtoList.add(responseDto);
 		}
 
-		return responseDtoList;
+		return DiskByMemberResponseDto.builder()
+				.memberId(member.getMemberId())
+				.memberName(member.getMemberName())
+				.nickname(member.getNickname())
+				.isMine(true)
+				.diskList(responseDtoList)
+				.build();
 	}
 
 	/**
 	 * 특정 맴버의 디스크 모두 조회
 	 */
-	public List<DiskResponseDto> getDisksByMemberId(Long memberId, String token) {
+	public DiskByMemberResponseDto getDisksByMemberId(Long memberId, String token) {
 		MemberEntity member = memberService.getMemberByJwt(token);
+		MemberEntity owner = memberRepository.findById(memberId)
+				.orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND_MEMBER, ErrorCode.NOT_FOUND_MEMBER.getMessage()));
+
 		List<DiskEntity> DisksByMemberId = diskRepository.findAllByMemberMemberIdOrderByIsBookmarkDesc(memberId);
 
 		List<DiskResponseDto> responseDtoList = new ArrayList<>();
@@ -163,14 +181,22 @@ public class DiskService {
 			responseDtoList.add(responseDto);
 		}
 
-		return responseDtoList;
+		return DiskByMemberResponseDto.builder()
+				.memberId(owner.getMemberId())
+				.memberName(owner.getMemberName())
+				.nickname(owner.getNickname())
+				.isMine(member == owner)
+				.diskList(responseDtoList)
+				.build();
 	}
 
 	/**
 	 * 특정 맴버의 대표 디스크 모두 조회
 	 */
-	public List<DiskResponseDto> getBookmarkedDisksByMemberId(Long memberId, String token) {
+	public DiskByMemberResponseDto getBookmarkedDisksByMemberId(Long memberId, String token) {
 		MemberEntity member = memberService.getMemberByJwt(token);
+		MemberEntity owner = memberRepository.findById(memberId)
+				.orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND_MEMBER, ErrorCode.NOT_FOUND_MEMBER.getMessage()));
 		List<DiskEntity> DisksByMemberId = diskRepository.findAllByMemberMemberIdAndIsBookmarkNotNullOrderByIsBookmarkDesc(memberId);
 
 		List<DiskResponseDto> responseDtoList = new ArrayList<>();
@@ -208,7 +234,13 @@ public class DiskService {
 			responseDtoList.add(responseDto);
 		}
 
-		return responseDtoList;
+		return DiskByMemberResponseDto.builder()
+				.memberId(owner.getMemberId())
+				.memberName(owner.getMemberName())
+				.nickname(owner.getNickname())
+				.isMine(member == owner)
+				.diskList(responseDtoList)
+				.build();
 	}
 
 	/**
