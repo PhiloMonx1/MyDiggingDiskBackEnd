@@ -50,8 +50,6 @@ public class MemberService {
 	public MemberResponseDto getMyPage(String token) {
 		MemberEntity member = getMemberByJwt(token);
 
-		Integer likeCnt = getTotalLikesByMemberId(member.getMemberId());
-
 		return MemberResponseDto.builder()
 				.memberId(member.getMemberId())
 				.memberName(member.getMemberName())
@@ -76,8 +74,6 @@ public class MemberService {
 				.orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND_MEMBER, ErrorCode.NOT_FOUND_MEMBER.getMessage()));
 
 		MemberEntity memberByJwt = getMemberByJwt(token);
-
-		Integer likeCnt = getTotalLikesByMemberId(member.getMemberId());
 
 		//조회수 증가
 		if(memberByJwt == null || (memberByJwt != null && !member.getMemberName().equals(memberByJwt.getMemberName()))) viewCntIncrease(member);
@@ -115,21 +111,32 @@ public class MemberService {
 	 * 회원가입
 	 */
 	public MemberTokenResponseDto join(MemberJoinRequestDto dto, HttpServletResponse response){
-		//TODO : 디스크 생성까지 같이 받을지에 대한 논의
-		//TODO : 최소 글자 수 및 빈값에 대한 예외처리
 		if(dto.getMemberName().isEmpty() || dto.getPassword().isEmpty()) throw new AppException(ErrorCode.EMPTY_JOIN_REQUEST, ErrorCode.EMPTY_JOIN_REQUEST.getMessage());
 		String memberName = dto.getMemberName().toLowerCase().replaceAll(" ", "");
 		String nickname = generator.getRandomNickname();
 
-		if(memberName.length() > 20 || !RegexUtils.isAlphanumeric(memberName))
+		if(memberName.length() < 8 || memberName.length() > 20 || !RegexUtils.isAlphanumeric(memberName))
 			throw new AppException(ErrorCode.WRONG_MEMBER_NAME_VALID, ErrorCode.WRONG_MEMBER_NAME_VALID.getMessage());
 		if(dto.getPassword().length() != 6 || !RegexUtils.isNumeric(dto.getPassword()))
 			throw new AppException(ErrorCode.WRONG_PASSWORD_VALID, ErrorCode.WRONG_PASSWORD_VALID.getMessage());
 
 		memberRepository.findByMemberName(memberName)
 				.ifPresent(memberEntity -> {throw new AppException(ErrorCode.MEMBER_NAME_DUPLICATED, ErrorCode.MEMBER_NAME_DUPLICATED.getMessage());});
+
+		for (int i = 0; i < 10; i++) {
+			if(memberRepository.findByNickname(nickname).isPresent()) {
+				nickname = generator.getRandomNickname();
+			}else break;
+		}
+
+		if(memberRepository.findByNickname(nickname).isPresent()) {
+			String currentTimeMillisStr = String.valueOf(System.currentTimeMillis());
+			nickname = currentTimeMillisStr.substring(currentTimeMillisStr.length() - 10);
+		}
+
 		memberRepository.findByNickname(nickname)
 				.ifPresent(memberEntity -> {throw new AppException(ErrorCode.MEMBER_NICKNAME_DUPLICATED, ErrorCode.MEMBER_NICKNAME_DUPLICATED.getMessage());});
+
 
 		MemberEntity member = MemberEntity.builder()
 				.memberName(memberName)
@@ -203,8 +210,6 @@ public class MemberService {
 
 		loginLogRepository.save(loginLog);
 
-		Integer likeCnt = getTotalLikesByMemberId(selectedMember.getMemberId());
-
 		MemberResponseDto memberResponseDto = MemberResponseDto.builder()
 				.memberId(selectedMember.getMemberId())
 				.memberName(selectedMember.getMemberName())
@@ -242,13 +247,13 @@ public class MemberService {
 	 */
 	public MemberResponseDto modifyMemberInfo(MemberModifyRequestDto dto, String token, MultipartFile file) throws IOException {
 		if(dto != null){
-			if(dto.getNickname() != null && dto.getNickname().replaceAll(" ", "").length() > 10) throw new AppException(ErrorCode.WRONG_NICKNAME_VALID, ErrorCode.WRONG_NICKNAME_VALID.getMessage());
+			if(dto.getNickname().isEmpty() || dto.getNickname() != null && dto.getNickname().replaceAll(" ", "").length() > 10)
+				throw new AppException(ErrorCode.WRONG_NICKNAME_VALID, ErrorCode.WRONG_NICKNAME_VALID.getMessage());
 			if(dto.getInterest() != null && dto.getInterest().length() > 10) throw new AppException(ErrorCode.WRONG_INTEREST_VALID, ErrorCode.WRONG_INTEREST_VALID.getMessage());
 			if(dto.getIntroduce() != null && dto.getIntroduce().length() > 30) throw new AppException(ErrorCode.WRONG_INTRODUCE_VALID, ErrorCode.WRONG_INTRODUCE_VALID.getMessage());
 		}
 
 		MemberEntity member = getMemberByJwt(token);
-		Integer likeCnt = getTotalLikesByMemberId(member.getMemberId());
 
 		String profileImg = member.getProfileImg();
 
@@ -304,8 +309,6 @@ public class MemberService {
 		MemberEntity member = memberRepository.findById(memberId)
 				.orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND_MEMBER, ErrorCode.NOT_FOUND_MEMBER.getMessage()));
 
-		Integer likeCnt = getTotalLikesByMemberId(member.getMemberId());
-
 		MemberResponseDto memberResponseDto = MemberResponseDto.builder()
 				.memberId(member.getMemberId())
 				.memberName(member.getMemberName())
@@ -313,7 +316,7 @@ public class MemberService {
 				.interest(member.getInterest())
 				.introduce(member.getIntroduce())
 				.visitCount(member.getVisitCount())
-				.likeCount(likeCnt)
+				.likeCount(member.getLikeCount())
 				.profileImg(member.getProfileImg())
 				.isMe(true)
 				.createdAt(member.getCreatedAt())

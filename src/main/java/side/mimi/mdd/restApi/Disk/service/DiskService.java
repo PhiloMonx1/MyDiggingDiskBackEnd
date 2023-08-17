@@ -38,7 +38,6 @@ public class DiskService {
 	 * 나의 디스크 모두 조회
 	 */
 	public DiskByMemberResponseDto getMyDisks(String token) {
-		//TODO : 오버패칭 유지할 것인지에 대한 판단 필요
 		MemberEntity member = memberService.getMemberByJwt(token);
 		List<DiskEntity> myDisks = diskRepository.findAllByMemberMemberIdOrderByIsBookmarkDesc(member.getMemberId());
 
@@ -291,12 +290,12 @@ public class DiskService {
 		MemberEntity member = memberService.getMemberByJwt(token);
 		List<DiskEntity> bookmarkedDiskList = diskRepository.findAllByMemberMemberIdAndIsBookmarkNotNullOrderByIsBookmarkDesc(member.getMemberId());
 
-		if(dto.getDiskName().length() > 30) throw new AppException(ErrorCode.OVER_LONG_DISK_NAME, ErrorCode.OVER_LONG_DISK_NAME.getMessage());
+		if(dto.getDiskName().isEmpty() || dto.getDiskName().length() > 30) throw new AppException(ErrorCode.OVER_LONG_DISK_NAME, ErrorCode.OVER_LONG_DISK_NAME.getMessage());
 		if(dto.getContent().length() > 300) throw new AppException(ErrorCode.OVER_LONG_CONTENT, ErrorCode.OVER_LONG_CONTENT.getMessage());
 		if(dto.getIsBookmark() != null && dto.getIsBookmark() && bookmarkedDiskList.size() >= 3)
 			throw new AppException(ErrorCode.BOOKMARK_DISK_LIMIT, ErrorCode.BOOKMARK_DISK_LIMIT.getMessage());
 		if(files != null && files.length > 4) throw new AppException(ErrorCode.IMG_COUNT_LIMIT, ErrorCode.IMG_COUNT_LIMIT.getMessage());
-		if (((dto.getIsTest() == null) || !dto.getIsTest()) && (files == null || files.length == 0))
+		if (files == null || files.length == 0)
 			throw new AppException(ErrorCode.IMG_COUNT_LACK, ErrorCode.IMG_COUNT_LACK.getMessage());
 
 		//isPrivate, isBookmark Default값 부여
@@ -335,8 +334,7 @@ public class DiskService {
 			}
 		}
 
-		if((dto.getIsTest() == null || !dto.getIsTest()) && images.size() == 0)
-			throw new AppException(ErrorCode.IMG_COUNT_LACK, ErrorCode.IMG_COUNT_LACK.getMessage());
+		if(images.size() == 0) throw new AppException(ErrorCode.IMG_COUNT_LACK, ErrorCode.IMG_COUNT_LACK.getMessage());
 
 		disk.setDiskImgList(images);
 		diskRepository.save(disk);

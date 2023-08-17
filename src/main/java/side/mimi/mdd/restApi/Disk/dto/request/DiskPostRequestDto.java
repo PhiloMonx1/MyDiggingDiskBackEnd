@@ -12,5 +12,4 @@ public class DiskPostRequestDto {
 	private DiskColorEnum diskColor;
 	private Boolean isPrivate;
 	private Boolean isBookmark;
-	private Boolean isTest;
 }
