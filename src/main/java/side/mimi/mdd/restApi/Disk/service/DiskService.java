@@ -335,6 +335,9 @@ public class DiskService {
 			}
 		}
 
+		if((dto.getIsTest() == null || !dto.getIsTest()) && images.size() == 0)
+			throw new AppException(ErrorCode.IMG_COUNT_LACK, ErrorCode.IMG_COUNT_LACK.getMessage());
+
 		disk.setDiskImgList(images);
 		diskRepository.save(disk);
 
