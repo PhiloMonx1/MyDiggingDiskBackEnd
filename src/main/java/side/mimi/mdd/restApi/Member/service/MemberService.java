@@ -122,8 +122,21 @@ public class MemberService {
 
 		memberRepository.findByMemberName(memberName)
 				.ifPresent(memberEntity -> {throw new AppException(ErrorCode.MEMBER_NAME_DUPLICATED, ErrorCode.MEMBER_NAME_DUPLICATED.getMessage());});
+
+		for (int i = 0; i < 10; i++) {
+			if(memberRepository.findByNickname(nickname).isPresent()) {
+				nickname = generator.getRandomNickname();
+			}else break;
+		}
+
+		if(memberRepository.findByNickname(nickname).isPresent()) {
+			String currentTimeMillisStr = String.valueOf(System.currentTimeMillis());
+			nickname = currentTimeMillisStr.substring(currentTimeMillisStr.length() - 10);
+		}
+
 		memberRepository.findByNickname(nickname)
 				.ifPresent(memberEntity -> {throw new AppException(ErrorCode.MEMBER_NICKNAME_DUPLICATED, ErrorCode.MEMBER_NICKNAME_DUPLICATED.getMessage());});
+
 
 		MemberEntity member = MemberEntity.builder()
 				.memberName(memberName)
