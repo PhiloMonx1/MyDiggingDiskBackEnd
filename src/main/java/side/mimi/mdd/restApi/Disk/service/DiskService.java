@@ -1,5 +1,6 @@
 package side.mimi.mdd.restApi.Disk.service;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -285,6 +286,7 @@ public class DiskService {
 	/**
 	 * 디스크 작성
 	 */
+	@Transactional
 	public DiskResponseDto postDisk(DiskPostRequestDto dto, String token, MultipartFile[] files) throws IOException {
 		MemberEntity member = memberService.getMemberByJwt(token);
 		List<DiskEntity> bookmarkedDiskList = diskRepository.findAllByMemberMemberIdAndIsBookmarkNotNullOrderByIsBookmarkDesc(member.getMemberId());
