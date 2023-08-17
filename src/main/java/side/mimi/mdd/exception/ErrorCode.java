@@ -23,9 +23,9 @@ public enum ErrorCode {
 	EMPTY_JOIN_REQUEST(HttpStatus.BAD_REQUEST, "MemberName, password은 필수 값 입니다."),
 	MEMBER_NAME_DUPLICATED(HttpStatus.CONFLICT, "이미 사용중인 MemberName 입니다."),
 	MEMBER_NICKNAME_DUPLICATED(HttpStatus.CONFLICT, "이미 사용중인 nickname 입니다."),
-	WRONG_MEMBER_NAME_VALID(HttpStatus.BAD_REQUEST, "MemberName은 20자 이하의 영어와 숫자로만 이루어져 있어야 합니다."),
+	WRONG_MEMBER_NAME_VALID(HttpStatus.BAD_REQUEST, "MemberName은 8자 이상, 20자 이하의 영어와 숫자로만 이루어져 있어야 합니다."),
 	WRONG_PASSWORD_VALID(HttpStatus.BAD_REQUEST, "password는 6자리 숫자로만 이루어져 있어야 합니다."),
-	WRONG_NICKNAME_VALID(HttpStatus.BAD_REQUEST, "nickname은 10자를 초과할 수 없습니다."),
+	WRONG_NICKNAME_VALID(HttpStatus.BAD_REQUEST, "nickname은 빈 값이거나 10자를 초과할 수 없습니다."),
 	WRONG_INTEREST_VALID(HttpStatus.BAD_REQUEST, "interest는 10자를 초과할 수 없습니다."),
 	WRONG_INTRODUCE_VALID(HttpStatus.BAD_REQUEST, "introduce는 30자를 초과할 수 없습니다."),
 	//로그인 (Login)
@@ -36,7 +36,7 @@ public enum ErrorCode {
 	 * DiskService 관련 에러코드
 	 */
 	//작성
-	OVER_LONG_DISK_NAME(HttpStatus.BAD_REQUEST, "DiskName 값은 30자를 초과할 수 없습니다."),
+	OVER_LONG_DISK_NAME(HttpStatus.BAD_REQUEST, "DiskName 값은 빈 값이거나 30자를 초과할 수 없습니다."),
 	OVER_LONG_CONTENT(HttpStatus.BAD_REQUEST, "content 값은 300자를 초과할 수 없습니다."),
 	//조회
 	NOT_FOUND_DISK(HttpStatus.NOT_FOUND, "해당 DiskId를 가진 Disk를 찾을 수 없습니다."),

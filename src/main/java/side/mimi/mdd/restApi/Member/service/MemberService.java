@@ -115,13 +115,11 @@ public class MemberService {
 	 * 회원가입
 	 */
 	public MemberTokenResponseDto join(MemberJoinRequestDto dto, HttpServletResponse response){
-		//TODO : 디스크 생성까지 같이 받을지에 대한 논의
-		//TODO : 최소 글자 수 및 빈값에 대한 예외처리
 		if(dto.getMemberName().isEmpty() || dto.getPassword().isEmpty()) throw new AppException(ErrorCode.EMPTY_JOIN_REQUEST, ErrorCode.EMPTY_JOIN_REQUEST.getMessage());
 		String memberName = dto.getMemberName().toLowerCase().replaceAll(" ", "");
 		String nickname = generator.getRandomNickname();
 
-		if(memberName.length() > 20 || !RegexUtils.isAlphanumeric(memberName))
+		if(memberName.length() < 8 || memberName.length() > 20 || !RegexUtils.isAlphanumeric(memberName))
 			throw new AppException(ErrorCode.WRONG_MEMBER_NAME_VALID, ErrorCode.WRONG_MEMBER_NAME_VALID.getMessage());
 		if(dto.getPassword().length() != 6 || !RegexUtils.isNumeric(dto.getPassword()))
 			throw new AppException(ErrorCode.WRONG_PASSWORD_VALID, ErrorCode.WRONG_PASSWORD_VALID.getMessage());
@@ -242,7 +240,8 @@ public class MemberService {
 	 */
 	public MemberResponseDto modifyMemberInfo(MemberModifyRequestDto dto, String token, MultipartFile file) throws IOException {
 		if(dto != null){
-			if(dto.getNickname() != null && dto.getNickname().replaceAll(" ", "").length() > 10) throw new AppException(ErrorCode.WRONG_NICKNAME_VALID, ErrorCode.WRONG_NICKNAME_VALID.getMessage());
+			if(dto.getNickname().isEmpty() || dto.getNickname() != null && dto.getNickname().replaceAll(" ", "").length() > 10)
+				throw new AppException(ErrorCode.WRONG_NICKNAME_VALID, ErrorCode.WRONG_NICKNAME_VALID.getMessage());
 			if(dto.getInterest() != null && dto.getInterest().length() > 10) throw new AppException(ErrorCode.WRONG_INTEREST_VALID, ErrorCode.WRONG_INTEREST_VALID.getMessage());
 			if(dto.getIntroduce() != null && dto.getIntroduce().length() > 30) throw new AppException(ErrorCode.WRONG_INTRODUCE_VALID, ErrorCode.WRONG_INTRODUCE_VALID.getMessage());
 		}

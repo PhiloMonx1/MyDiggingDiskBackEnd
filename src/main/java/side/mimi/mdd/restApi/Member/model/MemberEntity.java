@@ -32,7 +32,6 @@ public class MemberEntity extends BaseEntity {
 	@Column(name = "PASSWORD", nullable = false)
 	private String password;
 
-	//TODO: 닉네임 길이 및 랜덤 닉네임 생성 로직 수정
 	@Column(name = "NICKNAME", length = 10, nullable = false, unique = true)
 	private String nickname;
 
