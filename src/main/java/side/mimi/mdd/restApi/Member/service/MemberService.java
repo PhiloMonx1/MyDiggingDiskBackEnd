@@ -50,8 +50,6 @@ public class MemberService {
 	public MemberResponseDto getMyPage(String token) {
 		MemberEntity member = getMemberByJwt(token);
 
-		Integer likeCnt = getTotalLikesByMemberId(member.getMemberId());
-
 		return MemberResponseDto.builder()
 				.memberId(member.getMemberId())
 				.memberName(member.getMemberName())
@@ -76,8 +74,6 @@ public class MemberService {
 				.orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND_MEMBER, ErrorCode.NOT_FOUND_MEMBER.getMessage()));
 
 		MemberEntity memberByJwt = getMemberByJwt(token);
-
-		Integer likeCnt = getTotalLikesByMemberId(member.getMemberId());
 
 		//조회수 증가
 		if(memberByJwt == null || (memberByJwt != null && !member.getMemberName().equals(memberByJwt.getMemberName()))) viewCntIncrease(member);
@@ -201,8 +197,6 @@ public class MemberService {
 
 		loginLogRepository.save(loginLog);
 
-		Integer likeCnt = getTotalLikesByMemberId(selectedMember.getMemberId());
-
 		MemberResponseDto memberResponseDto = MemberResponseDto.builder()
 				.memberId(selectedMember.getMemberId())
 				.memberName(selectedMember.getMemberName())
@@ -247,7 +241,6 @@ public class MemberService {
 		}
 
 		MemberEntity member = getMemberByJwt(token);
-		Integer likeCnt = getTotalLikesByMemberId(member.getMemberId());
 
 		String profileImg = member.getProfileImg();
 
@@ -303,8 +296,6 @@ public class MemberService {
 		MemberEntity member = memberRepository.findById(memberId)
 				.orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND_MEMBER, ErrorCode.NOT_FOUND_MEMBER.getMessage()));
 
-		Integer likeCnt = getTotalLikesByMemberId(member.getMemberId());
-
 		MemberResponseDto memberResponseDto = MemberResponseDto.builder()
 				.memberId(member.getMemberId())
 				.memberName(member.getMemberName())
@@ -312,7 +303,7 @@ public class MemberService {
 				.interest(member.getInterest())
 				.introduce(member.getIntroduce())
 				.visitCount(member.getVisitCount())
-				.likeCount(likeCnt)
+				.likeCount(member.getLikeCount())
 				.profileImg(member.getProfileImg())
 				.isMe(true)
 				.createdAt(member.getCreatedAt())
