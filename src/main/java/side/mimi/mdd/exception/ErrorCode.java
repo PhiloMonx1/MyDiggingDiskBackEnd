@@ -52,7 +52,7 @@ public enum ErrorCode {
 	 * 이미지 유틸 관련 에러코드
 	 */
 	//이미지 형식 오류
-	NOT_SUPPORTED_FILE_TYPE(HttpStatus.BAD_REQUEST, "MultipartFile은 현재 PNG, JPG, JPGE 타입만 지원하고 있습니다."),
+	NOT_SUPPORTED_FILE_TYPE(HttpStatus.BAD_REQUEST, "MultipartFile은 현재 PNG, JPG, JPEG 타입만 지원하고 있습니다."),
 	FILE_COUNT_LIMIT(HttpStatus.BAD_REQUEST, "MultipartFile은 한 번에 4개를 초과해서 등록 요청할 수 없습니다."),
 	;
 
