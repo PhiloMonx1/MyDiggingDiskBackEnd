@@ -296,7 +296,7 @@ public class DiskService {
 		if(dto.getIsBookmark() != null && dto.getIsBookmark() && bookmarkedDiskList.size() >= 3)
 			throw new AppException(ErrorCode.BOOKMARK_DISK_LIMIT, ErrorCode.BOOKMARK_DISK_LIMIT.getMessage());
 		if(files != null && files.length > 4) throw new AppException(ErrorCode.IMG_COUNT_LIMIT, ErrorCode.IMG_COUNT_LIMIT.getMessage());
-		if (((dto.getIsTest() == null) || !dto.getIsTest()) && (files == null || files.length == 0))
+		if (files == null || files.length == 0)
 			throw new AppException(ErrorCode.IMG_COUNT_LACK, ErrorCode.IMG_COUNT_LACK.getMessage());
 
 		//isPrivate, isBookmark Default값 부여
@@ -335,8 +335,7 @@ public class DiskService {
 			}
 		}
 
-		if((dto.getIsTest() == null || !dto.getIsTest()) && images.size() == 0)
-			throw new AppException(ErrorCode.IMG_COUNT_LACK, ErrorCode.IMG_COUNT_LACK.getMessage());
+		if(images.size() == 0) throw new AppException(ErrorCode.IMG_COUNT_LACK, ErrorCode.IMG_COUNT_LACK.getMessage());
 
 		disk.setDiskImgList(images);
 		diskRepository.save(disk);

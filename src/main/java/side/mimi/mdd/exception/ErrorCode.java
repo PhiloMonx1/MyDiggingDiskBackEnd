@@ -45,7 +45,7 @@ public enum ErrorCode {
 	//대표 디스크 (북마크, favorite)
 	BOOKMARK_DISK_LIMIT(HttpStatus.BAD_REQUEST, "대표디스크는 3개 까지 설정 가능합니다."),
 	//이미지
-	IMG_COUNT_LACK(HttpStatus.BAD_REQUEST, "DISK 작성 시 최소 하나의 이미지가 필요합니다. (테스트일 경우 isTest 값을 true로 설정해서 우회할 수 있습니다.)"),
+	IMG_COUNT_LACK(HttpStatus.BAD_REQUEST, "DISK 작성 시 최소 하나의 이미지가 필요합니다."),
 	IMG_COUNT_LIMIT(HttpStatus.BAD_REQUEST, "DISK 이미지는 4개까지 설정 가능합니다."),
 	NOT_FOUND_IMG(HttpStatus.NOT_FOUND, "해당 아이디의 이미지를 찾을 수 없습니다."),
 	/**
