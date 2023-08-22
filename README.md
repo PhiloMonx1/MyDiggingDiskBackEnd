@@ -18,7 +18,7 @@
 <br/>
 
 ## 🌐[My Digging Disk 방문하기](https://www.mydiggingdisk.com/)
-➡️ [My Digging Disk Team Notion](https://www.notion.so/3c58db3b3c264afda3f88be457c78a39?pvs=4)  <br/>
+➡️ [My Digging Disk Team Notion](https://silicon-fireplace-83b.notion.site/8282bdec88fe46599a55b5a9cdf7fd4e?pvs=4)  <br/>
 ➡️ [My Digging Disk FrontEnd github](https://github.com/green9930/mdd_FE)<br/>
 <br/>
 
