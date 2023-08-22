@@ -21,6 +21,8 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation group: 'com.auth0', name: 'java-jwt', version: '4.4.0'
 
+    implementation group: 'software.amazon.awssdk', name: 's3', version: '2.20.121'
+
     compileOnly 'org.projectlombok:lombok'
     runtimeOnly 'com.h2database:h2'
     runtimeOnly 'com.mysql:mysql-connector-j'

@@ -22,10 +22,7 @@ import java.util.List;
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
-	private String frontendUrl = "http://localhost:3000";
-	private final MemberService memberService;
-	@Value("${jwt.secret}")
-	private String secretKey;
+	private String frontendUrl = "https://www.mydiggingdisk.com";
 
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
@@ -35,7 +32,7 @@ public class SecurityConfig {
 				.cors(cors -> cors
 						.configurationSource(request -> {
 							CorsConfiguration configuration = new CorsConfiguration();
-							configuration.setAllowedOrigins(List.of(frontendUrl));
+							configuration.setAllowedOrigins(List.of(frontendUrl, "http://localhost:3000"));
 							configuration.setAllowedMethods(
 									List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
 							configuration.setAllowedHeaders(List.of("*"));
@@ -50,15 +47,25 @@ public class SecurityConfig {
 						//h2-console (개발단계 허용)
 						.requestMatchers(PathRequest.toH2Console()).permitAll()
 						//전체 허용 (개발단계 전체 API 허용)
+						.requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.GET,"/api/v1/members/test/token")).permitAll()
 //						.requestMatchers(AntPathRequestMatcher.antMatcher("/api/**")).permitAll()
-						//회원 가입 로그인.
+						//MEMBER API.
 						.requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.POST,"/api/v1/members/join")).permitAll()
-						.requestMatchers(AntPathRequestMatcher.antMatcher("/api/v1/members/login")).permitAll()
+						.requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.POST,"/api/v1/members/login")).permitAll()
+						.requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.GET,"/api/v1/members/{memberId}")).permitAll()
+						.requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.GET,"/api/v1/members/check/{memberName}")).permitAll()
+						.requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.GET,"/api/v1/members/check/nick/{nickname}")).permitAll()
+						.requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.POST,"/api/v1/members/like/{memberId}")).permitAll()
+						//DISK API.
+						.requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.GET,"/api/v1/disks/{diskId}")).permitAll()
+						.requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.GET,"/api/v1/disks/all/{memberId}")).permitAll()
+						.requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.GET,"/api/v1/disks/all/bookmarked/{memberId}")).permitAll()
+						.requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.POST,"/api/v1/disks/like/{diskId}")).permitAll()
 
 						.anyRequest().authenticated())
 				.sessionManagement(sessionManagement -> sessionManagement
 						.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-				.addFilterBefore(new JwtFilter(memberService, secretKey), UsernamePasswordAuthenticationFilter.class)
+				.addFilterBefore(new JwtFilter(), UsernamePasswordAuthenticationFilter.class)
 				.build();
 	}
 }
