@@ -1,6 +1,7 @@
 package side.mimi.mdd.restApi.Member.service;
 
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -74,9 +75,6 @@ public class MemberService {
 				.orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND_MEMBER, ErrorCode.NOT_FOUND_MEMBER.getMessage()));
 
 		MemberEntity memberByJwt = getMemberByJwt(token);
-
-		//조회수 증가
-		if(memberByJwt == null || (memberByJwt != null && !member.getMemberName().equals(memberByJwt.getMemberName()))) viewCntIncrease(member);
 
 		return MemberResponseDto.builder()
 				.memberId(member.getMemberId())
@@ -345,6 +343,23 @@ public class MemberService {
 		member.likeCntIncrease();
 		memberRepository.save(member);
 		return member.getLikeCount();
+	}
+
+	/**
+	 * 맴버 조회수 증가
+	 */
+	public Integer viewMember(Long memberId, HttpSession session, String token) {
+		MemberEntity member = memberRepository.findById(memberId)
+				.orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND_MEMBER, ErrorCode.NOT_FOUND_MEMBER.getMessage()));
+
+		MemberEntity memberByJwt = getMemberByJwt(token);
+
+		//TODO : session.getId()와 memberId DB나 레디스에 저장해서 중복 조회 방지
+
+		if(memberByJwt == null || (memberByJwt != null && !member.getMemberName().equals(memberByJwt.getMemberName())))
+			viewCntIncrease(member);
+
+		return member.getVisitCount();
 	}
 
 

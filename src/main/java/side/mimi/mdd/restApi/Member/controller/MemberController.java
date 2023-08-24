@@ -1,6 +1,7 @@
 package side.mimi.mdd.restApi.Member.controller;
 
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -101,5 +102,14 @@ public class MemberController {
 	@PostMapping("/like/{memberId}")
 	public ResponseEntity<Integer> likeMember(@PathVariable Long memberId){
 		return ResponseEntity.ok().body(memberService.likeMember(memberId));
+	}
+
+	/**
+	 * 조회수 증가
+	 */
+	@PostMapping("/view/{memberId}")
+	public ResponseEntity<Integer> viewMember(@PathVariable Long memberId, HttpSession session,
+	                                          @RequestHeader(name="Authorization", required = false) String token){
+		return ResponseEntity.ok().body(memberService.viewMember(memberId, session, token));
 	}
 }
