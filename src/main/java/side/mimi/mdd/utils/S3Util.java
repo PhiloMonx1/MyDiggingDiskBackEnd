@@ -13,6 +13,11 @@ import software.amazon.awssdk.services.s3.model.GetUrlRequest;
 import software.amazon.awssdk.services.s3.model.ObjectCannedACL;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
+import javax.imageio.ImageIO;
+import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
@@ -33,11 +38,37 @@ public class S3Util {
 		String fileExtension = fileName.substring(fileName.lastIndexOf(".") + 1).toLowerCase();
 
 		List<String> allowedExtensions = Arrays.asList("png", "jpg", "jpeg");
-		if (file != null && !allowedExtensions.contains(fileExtension)) throw new AppException(ErrorCode.NOT_SUPPORTED_FILE_TYPE, ErrorCode.NOT_SUPPORTED_FILE_TYPE.getMessage());
+		if (file != null && !allowedExtensions.contains(fileExtension))
+			throw new AppException(ErrorCode.NOT_SUPPORTED_FILE_TYPE, ErrorCode.NOT_SUPPORTED_FILE_TYPE.getMessage() + "현재 확장자 : " + fileExtension );
 
-		String contentType = file.getContentType();
-		if (contentType == null || contentType.isEmpty()) {
-			contentType = MediaType.APPLICATION_OCTET_STREAM_VALUE;
+		BufferedImage originalImage = ImageIO.read(new ByteArrayInputStream(file.getBytes()));
+		int originalWidth = originalImage.getWidth();
+		int originalHeight = originalImage.getHeight();
+		int newWidth, newHeight;
+
+		if (originalWidth > originalHeight) {
+			newWidth = (originalWidth * 900) / originalHeight;
+			newHeight = 900;
+		} else {
+			newWidth = 900;
+			newHeight =(originalHeight * 900) / originalWidth;
+		}
+
+		Image resultingImage=originalImage.getScaledInstance(newWidth, newHeight, Image.SCALE_DEFAULT);
+		BufferedImage outputImage=new BufferedImage(newWidth,newHeight,BufferedImage.TYPE_INT_RGB);
+		outputImage.getGraphics().drawImage(resultingImage,0,0,null);
+
+		String contentType=file.getContentType();
+		if(contentType==null || contentType.isEmpty()){
+			contentType=MediaType.APPLICATION_OCTET_STREAM_VALUE;
+		}
+
+		byte[] resizedBytes;
+
+		try(ByteArrayOutputStream baos=new ByteArrayOutputStream()){
+			ImageIO.write(outputImage,fileExtension,baos);
+			baos.flush();
+			resizedBytes=baos.toByteArray();
 		}
 
 		s3Client.putObject(
@@ -47,7 +78,7 @@ public class S3Util {
 						.contentType(contentType)
 						.acl(ObjectCannedACL.PUBLIC_READ)
 						.build(),
-				RequestBody.fromBytes(file.getBytes())
+				RequestBody.fromBytes(resizedBytes)
 		);
 		return s3Client.utilities().getUrl(GetUrlRequest.builder().bucket(bucketName).key(fileName).build()).toString();
 	}
