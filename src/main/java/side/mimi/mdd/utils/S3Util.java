@@ -33,7 +33,8 @@ public class S3Util {
 		String fileExtension = fileName.substring(fileName.lastIndexOf(".") + 1).toLowerCase();
 
 		List<String> allowedExtensions = Arrays.asList("png", "jpg", "jpeg");
-		if (file != null && !allowedExtensions.contains(fileExtension)) throw new AppException(ErrorCode.NOT_SUPPORTED_FILE_TYPE, ErrorCode.NOT_SUPPORTED_FILE_TYPE.getMessage());
+		if (file != null && !allowedExtensions.contains(fileExtension))
+			throw new AppException(ErrorCode.NOT_SUPPORTED_FILE_TYPE, ErrorCode.NOT_SUPPORTED_FILE_TYPE.getMessage() + "현재 확장자 : " + fileExtension );
 
 		String contentType = file.getContentType();
 		if (contentType == null || contentType.isEmpty()) {
