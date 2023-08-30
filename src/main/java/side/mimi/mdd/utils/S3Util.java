@@ -46,12 +46,17 @@ public class S3Util {
 		int originalHeight = originalImage.getHeight();
 		int newWidth, newHeight;
 
-		if (originalWidth > originalHeight) {
-			newWidth = (originalWidth * 900) / originalHeight;
-			newHeight = 900;
-		} else {
-			newWidth = 900;
-			newHeight =(originalHeight * 900) / originalWidth;
+		if (originalWidth > 900 || originalHeight > 900) {
+			if (originalWidth > originalHeight) {
+				newWidth = (originalWidth * 900) / originalHeight;
+				newHeight = 900;
+			} else {
+				newWidth = 900;
+				newHeight =(originalHeight * 900) / originalWidth;
+			}
+		} else { // if both the width and height are less than or equal to 900, keep the image size as it is.
+			newWidth = originalWidth;
+			newHeight=originalHeight;
 		}
 
 		Image resultingImage=originalImage.getScaledInstance(newWidth, newHeight, Image.SCALE_DEFAULT);
@@ -83,4 +88,3 @@ public class S3Util {
 		return s3Client.utilities().getUrl(GetUrlRequest.builder().bucket(bucketName).key(fileName).build()).toString();
 	}
 }
-
